@@ -5,7 +5,10 @@ Please include your answers to the questions below with your submission, enterin
 See [Mastering Markdown](https://guides.github.com/features/mastering-markdown/) for github markdown formatting if desired.
 
 **1. How much current does the system draw (instantaneous measurement) when a single LED is on with the GPIO pin set to StrongAlternateStrong?**
-   Answer:
+   Answer:5.09mA
+
+   A screenshot of the current draw is shown below-
+   ![alt text](image.png)
 
 
 **2. How much current does the system draw (instantaneous measurement) when a single LED is on with the GPIO pin set to WeakAlternateWeak?**
