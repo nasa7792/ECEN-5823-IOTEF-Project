@@ -40,9 +40,11 @@
 // to determine the correct values for these.
 // If these links have gone bad, consult the reference manual and/or the datasheet for the MCU.
 // Change to correct port and pins:
-#define LED_port   (gpioPortF  )
-#define LED0_pin   (4)
-#define LED1_pin   (5)
+
+//After reviewing https://www.silabs.com/documents/public/user-guides/ug279-brd4104a-user-guide.pdf
+#define LED_port   (gpioPortF)
+#define LED0_pin   (4) //UIF_LED0
+#define LED1_pin   (5) //UIF_LED1
 
 
 
