@@ -20,11 +20,11 @@ See [Mastering Markdown](https://guides.github.com/features/mastering-markdown/)
 **3. Is there a meaningful difference in current between the answers for question 1 and 2? Please explain your answer, referencing the main board schematic, WSTK-Main-BRD4001A-A01-schematic.pdf or WSTK-Main-BRD4002A-A06-schematic.pdf, and AEM Accuracy in the ug279-brd4104a-user-guide.pdf. Both of these PDF files are available in the ECEN 5823 Student Public Folder in Google drive at: https://drive.google.com/drive/folders/1ACI8sUKakgpOLzwsGZkns3CQtc7r35bB?usp=sharing . Extra credit is available for this question and depends on your answer.**
    Answer: After taking multiple measurements between the different drive strenghts there was almost no measurable diffirence between the two settings of the drive strenghts. 
 
-   After reviewing the schematic in the above google drive, we can see that the leds are connected to the port via a current limiting resistor. Based on the class disussion in Lecture 4 we can say that changing GPIO drive strength primarily affects the output slew rate, not the steady-state current, for a resistively limited load like the onboard LED. Only the rise and fall times are effected however is same.
+   After reviewing the schematic in the above google drive, we can see that the leds are connected to the port via a current limiting resistor. Based on the class disussion in Lecture 4 we can say that changing GPIO drive strength primarily affects the output slew rate, not the steady-state current, for a resistively limited load like the onboard LED. Only the rise and fall times are effected ,current however is same.
 
    ![alt text](image-4.png)
 
-   After reading the "ug279-brd4104a-user-guide.pdf" and the section "AEM Accuracy and Performance" we can observe that the accuracy of the AEM is limited to 0.1mA above 250 µA. Since we are way measuring current above that range, any minute difference by changing the drive strength would not be measurable by the AEM profiler tool.
+   After reading the "ug279-brd4104a-user-guide.pdf" and the section "AEM Accuracy and Performance" we can observe that the accuracy of the AEM is limited to 0.1mA above 250 µA. Since we are way measuring current above that range, any difference by changing the drive strength would not be measurable by the AEM profiler tool.
 
    ![alt text](image-5.png)
 
