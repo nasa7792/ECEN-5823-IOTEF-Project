@@ -24,7 +24,7 @@ See [Mastering Markdown](https://guides.github.com/features/mastering-markdown/)
 
    ![alt text](image-4.png)
 
-   After reading the "ug279-brd4104a-user-guide.pdf" and the section "AEM Accuracy and Performance" we can observe that the accuracy of the AEM is limited to 0.1mA above 250 µA. Since we are way measuring current above that range, any difference by changing the drive strength would not be measurable by the AEM profiler tool.
+   After reading the "ug279-brd4104a-user-guide.pdf" and the section "AEM Accuracy and Performance" we can observe that the accuracy of the AEM is limited to 0.1mA above 250 µA. Since we are measuring current way above that range, any difference by changing the drive strength would not be measurable by the AEM profiler tool.
 
    ![alt text](image-5.png)
 
