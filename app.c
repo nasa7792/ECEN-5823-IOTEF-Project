@@ -162,6 +162,7 @@ SL_WEAK void app_init(void)
   // Student Edit: Add a call to gpioInit() here
   //added call to gpioInit to set drive strength of port.
   gpioInit();
+  letimer_init();
 
 } // app_init()
 
@@ -188,6 +189,7 @@ static void delayApprox(int delay)
 
 
 
+
 /**************************************************************************//**
  * Application Process Action.
  *****************************************************************************/
@@ -199,16 +201,6 @@ SL_WEAK void app_process_action(void)
   //         We will create/use a scheme that is far more energy efficient in
   //         later assignments.
 
-  delayApprox(3500000);
-  //code modification to blink both the LEDS
-  //turn on both leds
-  gpioLed0SetOn();
-  gpioLed1SetOn();
-  //wait for almost a second
-  delayApprox(3500000);
-  //turn off both leds
-  gpioLed0SetOff();
-  gpioLed1SetOff();
 
 } // app_process_action()
 

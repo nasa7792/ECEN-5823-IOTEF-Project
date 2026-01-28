@@ -48,6 +48,14 @@
 #ifndef APP_H
 #define APP_H
 
+#define LOWEST_ENERGY_MODE 0
+#define REQ_LED_ON_TIME (0.175)
+#define REQ_LED_PERIOD (2.25)
+#define FEQ_LFXO (32768)
+#define PRE_SCALER_LFXO (4)
+
+
+#include"src/timer.h"
 /**************************************************************************//**
  * Application Init.
  *****************************************************************************/
