@@ -7,20 +7,21 @@
 
 #include"irq.h"
 
+void enable_LETIMER0_interrupt(){
+
+}
+
 void LETIMER0_IRQHandler(void)
 {
     uint32_t flags = LETIMER_IntGet(LETIMER0);
     LETIMER_IntClear(LETIMER0, flags);
-    static int state=1;
-
     if (flags & LETIMER_IF_COMP0)
     {
-        if(state==1){
-            gpioLed0SetOn();
-        }
-        else{
-            gpioLed0SetOff();
-        }
-        state=!state;
+        gpioLed0SetOff();
+
+    }
+    if(flags & LETIMER_IF_COMP1)
+    {
+        gpioLed0SetOn();
     }
 }

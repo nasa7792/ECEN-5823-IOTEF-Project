@@ -11,5 +11,5 @@
 #include"gpio.h"
 #include "em_letimer.h"
 
-
+void enable_LETIMER0_interrupt();
 #endif /* SRC_IRQ_H_ */

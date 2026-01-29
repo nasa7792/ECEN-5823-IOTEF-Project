@@ -94,9 +94,11 @@
 // Students: We'll need to modify this for A2 onward so that compile time we
 //           control what the lowest EM (energy mode) the MCU sleeps to. So
 //           think "#if (expression)".
+#if(LOWEST_ENERGY_MODE==0)
 #define APP_IS_OK_TO_SLEEP      (false)
-//#define APP_IS_OK_TO_SLEEP      (true)
-
+#else
+#define APP_IS_OK_TO_SLEEP      (true)
+#endif
 
 // Return values for app_sleep_on_isr_exit():
 //   SL_POWER_MANAGER_IGNORE; // The module did not trigger an ISR and it doesn't want to contribute to the decision
@@ -161,29 +163,17 @@ SL_WEAK void app_init(void)
 
   // Student Edit: Add a call to gpioInit() here
   //added call to gpioInit to set drive strength of port.
+#if (LOWEST_ENERGY_MODE == 1)
+  sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
+#elif (LOWEST_ENERGY_MODE == 2)
+  sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM2);
+#endif
   gpioInit();
   letimer_init();
 
 } // app_init()
 
 
-
-
-/*****************************************************************************
- * delayApprox(), private to this file.
- * A value of 3500000 is ~ 1 second. After assignment 1 you can delete or
- * comment out this function. Wait loops are a bad idea in general.
- * We'll discuss how to do this a better way in the next assignment.
- *****************************************************************************/
-static void delayApprox(int delay)
-{
-  volatile int i;
-
-  for (i = 0; i < delay; ) {
-      i=i+1;
-  }
-
-} // delayApprox()
 
 
 
