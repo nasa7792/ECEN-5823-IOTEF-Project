@@ -17,8 +17,8 @@ void letimer0_init(void)
     /*
     calculate the number of timer ticks for led period and the led on time
     */
-    uint32_t REQ_TICKS_LED_PERIOD = (FEQ_OSC * REQ_LED_PERIOD) / PRE_SCALER_OSC;
-    uint32_t REQ_TICKS_LED_ON_TIME = (FEQ_OSC * REQ_LED_ON_TIME) / PRE_SCALER_OSC;
+    uint32_t REQ_TICKS_LED_PERIOD = ((FEQ_OSC * LETIMER_PERIOD_MS) / (PRE_SCALER_OSC))/CONVERT_MS_TO_SEC;
+    uint32_t REQ_TICKS_LED_ON_TIME = ((FEQ_OSC * LETIMER_ON_TIME_MS) / (PRE_SCALER_OSC))/CONVERT_MS_TO_SEC;
     LETIMER_Init_TypeDef letimerInit = LETIMER_INIT_DEFAULT;
 
     letimerInit.enable = false;  // Start later

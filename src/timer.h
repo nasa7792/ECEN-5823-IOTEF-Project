@@ -16,6 +16,7 @@
 #include "em_core.h"
 #include "oscillators.h"
 #include "app.h"
+#include "irq.h"
 
 /*
 Function to configure LETIMER0 to generate interrupts at the user specified rate 

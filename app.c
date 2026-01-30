@@ -94,7 +94,7 @@
 // Students: We'll need to modify this for A2 onward so that compile time we
 //           control what the lowest EM (energy mode) the MCU sleeps to. So
 //           think "#if (expression)".
-#if(LOWEST_ENERGY_MODE==0)
+#if(LOWEST_ENERGY_MODE==EM0_MODE)
 #define APP_IS_OK_TO_SLEEP      (false)
 #else
 #define APP_IS_OK_TO_SLEEP      (true)
@@ -155,6 +155,7 @@ sl_power_manager_on_isr_exit_t app_sleep_on_isr_exit(void)
 /**************************************************************************//**
  * Application Init.
  *****************************************************************************/
+
 SL_WEAK void app_init(void)
 {
   // Put your application 1-time initialization code here.
@@ -163,9 +164,9 @@ SL_WEAK void app_init(void)
 
   // Student Edit: Add a call to gpioInit() here
   //added call to gpioInit to set drive strength of port.
-#if (LOWEST_ENERGY_MODE == 1)
+#if (LOWEST_ENERGY_MODE == EM1_MODE)
   sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
-#elif (LOWEST_ENERGY_MODE == 2)
+#elif (LOWEST_ENERGY_MODE == EM2_MODE)
   sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM2);
 #endif
   gpioInit();
