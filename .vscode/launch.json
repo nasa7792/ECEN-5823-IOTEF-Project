@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/Users/Asus/SimplicityStudio/v5_workspace/ecen5823-assignment1-nasa7792",
-      "program": "c:/Users/Asus/SimplicityStudio/v5_workspace/ecen5823-assignment1-nasa7792/build/Debug/outDebug",
+      "cwd": "c:/Users/Nalin Saxena/SimplicityStudio/v5_workspace/ecen5823-assignment1-nasa7792",
+      "program": "c:/Users/Nalin Saxena/SimplicityStudio/v5_workspace/ecen5823-assignment1-nasa7792/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

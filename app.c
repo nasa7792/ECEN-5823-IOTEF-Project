@@ -169,7 +169,7 @@ SL_WEAK void app_init(void)
   sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM2);
 #endif
   gpioInit();
-  letimer_init();
+  letimer0_init();
 
 } // app_init()
 

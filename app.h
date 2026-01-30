@@ -57,7 +57,7 @@
   #define FEQ_OSC (32768)
 #endif
 
-#define PRE_SCALER_LFXO (4)
+#define PRE_SCALER_OSC (4)
 
 #include"src/timer.h"
 /**************************************************************************//**
