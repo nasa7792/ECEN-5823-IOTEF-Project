@@ -7,10 +7,10 @@ See [Mastering Markdown](https://guides.github.com/features/mastering-markdown/)
 
 Energy Mode | Period (ms) | LED On Time (ms) |Period average current (uA) | Average Current with LED off (uA) | Average Current with LED On (uA)
 ------------| ------------|------------------|----------------------------|-----------------------------------|---------------------------------
-EM0         |    TBD      |       TBD        |          TBD               |           TBD                     |         TBD
-EM1         |    TBD      |       TBD        |          TBD               |           TBD                     |         TBD
-EM2         |    TBD      |       TBD        |          TBD               |           TBD                     |         TBD
-EM3         |    TBD      |       TBD        |          TBD               |           TBD                     |         TBD
+EM0         |    2250      |       175.20        |          5450               |           5410                     |         5890
+EM1         |    2250      |       175.80        |          4070               |           4030                     |         4520
+EM2         |    2250      |       175.80         |          49.88               |           10.11                     |         523.09
+EM3         |    2220      |       174.00        |          49.64               |           8.74                     |         519.41
 
 
 
