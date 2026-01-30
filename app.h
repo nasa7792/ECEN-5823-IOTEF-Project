@@ -48,16 +48,16 @@
 #ifndef APP_H
 #define APP_H
 
-#define LOWEST_ENERGY_MODE 3
+#define LOWEST_ENERGY_MODE (3) // change this to switch b/w modes
 #define LETIMER_ON_TIME_MS (175) //led on time as specified by A2
 #define LETIMER_PERIOD_MS (2250) //led period time as specified by A2
-#define CONVERT_MS_TO_SEC (1000)
+#define CONVERT_MS_TO_SEC (1000) //Conversion factor
 
-//declare all enery modes to be macros to avoid magic number
-#define EM0_MODE 0
-#define EM1_MODE 1
-#define EM2_MODE 2
-#define EM3_MODE 3
+//declare all energy modes to be macros to avoid magic number
+#define EM0_MODE (0)
+#define EM1_MODE (1)
+#define EM2_MODE (2)
+#define EM3_MODE (3)
 
 /* 
 we need to conditionally define the macro for oscillator frequency so code remains uniform

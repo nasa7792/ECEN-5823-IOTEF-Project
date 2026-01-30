@@ -164,6 +164,7 @@ SL_WEAK void app_init(void)
 
   // Student Edit: Add a call to gpioInit() here
   //added call to gpioInit to set drive strength of port.
+//we need to add power manager requirement for em1 and em2
 #if (LOWEST_ENERGY_MODE == EM1_MODE)
   sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
 #elif (LOWEST_ENERGY_MODE == EM2_MODE)

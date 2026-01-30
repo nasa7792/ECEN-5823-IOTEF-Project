@@ -28,11 +28,11 @@ void letimer0_init(void)
     LETIMER_Init(LETIMER0, &letimerInit);
 
     // Set compare value 0 for 2.25 s
-    LETIMER_CompareSet(LETIMER0, 0, REQ_TICKS_LED_PERIOD);
+    LETIMER_CompareSet(LETIMER0, COMP0, REQ_TICKS_LED_PERIOD);
     LETIMER_IntClear(LETIMER0, LETIMER_IF_COMP0);
 
     // Set compare value 1 for 175 ms
-    LETIMER_CompareSet(LETIMER0, 1, REQ_TICKS_LED_ON_TIME);
+    LETIMER_CompareSet(LETIMER0,COMP1 , REQ_TICKS_LED_ON_TIME);
     LETIMER_IntClear(LETIMER0, LETIMER_IF_COMP1);
 
     // Enable COMP0 and COMP1 interrupt

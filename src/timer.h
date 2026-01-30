@@ -17,6 +17,9 @@
 #include "oscillators.h"
 #include "app.h"
 #include "irq.h"
+//macros for comp register positions
+#define COMP0 0
+#define COMP1 1
 
 /*
 Function to configure LETIMER0 to generate interrupts at the user specified rate 

@@ -15,7 +15,7 @@ void select_oscillator(void)
     CMU_ClockEnable(cmuClock_LFA, true);
     CMU_ClockDivSet(cmuClock_LETIMER0, cmuClkDiv_4);
     // we need to correctly choose our oscillator
-    if (LOWEST_ENERGY_MODE <= 2)
+    if (LOWEST_ENERGY_MODE <= EM2_MODE)
     {
         CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
     }
