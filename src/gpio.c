@@ -41,10 +41,6 @@
 // If these links have gone bad, consult the reference manual and/or the datasheet for the MCU.
 // Change to correct port and pins:
 
-//After reviewing https://www.silabs.com/documents/public/user-guides/ug279-brd4104a-user-guide.pdf
-#define LED_port   (gpioPortF)
-#define LED0_pin   (4) //UIF_LED0
-#define LED1_pin   (5) //UIF_LED1
 
 
 
@@ -57,11 +53,11 @@ void gpioInit()
     // in a "Port" share the same drive strength setting. 
 	//GPIO_DriveStrengthSet(LED_port, gpioDriveStrengthStrongAlternateStrong); // Strong, 10mA
 	GPIO_DriveStrengthSet(LED_port, gpioDriveStrengthWeakAlternateWeak); // Weak, 1mA
-	
+  GPIO_DriveStrengthSet(TEMP_SENSOR_PORT, gpioDriveStrengthWeakAlternateWeak); // Weak, 1mA
 	// Set the 2 GPIOs mode of operation
 	GPIO_PinModeSet(LED_port, LED0_pin, gpioModePushPull, false);
 	GPIO_PinModeSet(LED_port, LED1_pin, gpioModePushPull, false);
-
+  GPIO_PinModeSet(TEMP_SENSOR_PORT, LED1_pin, gpioModePushPull, false);
 
 } // gpioInit()
 

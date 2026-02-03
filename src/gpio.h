@@ -29,7 +29,12 @@
 #ifndef SRC_GPIO_H_
 #define SRC_GPIO_H_
 
-
+//After reviewing https://www.silabs.com/documents/public/user-guides/ug279-brd4104a-user-guide.pdf
+#define LED_port   (gpioPortF)
+#define TEMP_SENSOR_PORT (gpioPortD)
+#define LED0_pin   (4) //UIF_LED0
+#define LED1_pin   (5) //UIF_LED1
+#define TEMP_SENSOR_ENABLE_PIN (15)
 
 
 // Function prototypes

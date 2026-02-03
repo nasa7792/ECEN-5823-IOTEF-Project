@@ -47,8 +47,9 @@
 
 #ifndef APP_H
 #define APP_H
+#include"src/i2c.h"
 
-#define LOWEST_ENERGY_MODE (3) // change this to switch b/w modes
+#define LOWEST_ENERGY_MODE (0) // change this to switch b/w modes
 #define LETIMER_ON_TIME_MS (175) //led on time as specified by A2
 #define LETIMER_PERIOD_MS (2250) //led period time as specified by A2
 #define CONVERT_MS_TO_SEC (1000) //Conversion factor
