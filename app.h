@@ -51,8 +51,9 @@
 
 #define LOWEST_ENERGY_MODE (0) // change this to switch b/w modes
 #define LETIMER_ON_TIME_MS (175) //led on time as specified by A2
-#define LETIMER_PERIOD_MS (2250) //led period time as specified by A2
+#define LETIMER_PERIOD_MS (3000) //sensor sampling time as specified by A3
 #define CONVERT_MS_TO_SEC (1000) //Conversion factor
+#define CONVERT_US_TO_SEC (1000000) //Conversion factor
 
 //declare all energy modes to be macros to avoid magic number
 #define EM0_MODE (0)

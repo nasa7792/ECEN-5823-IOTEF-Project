@@ -171,8 +171,8 @@ SL_WEAK void app_init(void)
   sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM2);
 #endif
   gpioInit();
-  //letimer0_init();
-  initialize_I2C0();
+  letimer0_init();
+  //initialize_I2C0();
 
 } // app_init()
 
@@ -193,10 +193,11 @@ SL_WEAK void app_process_action(void)
   // Notice: This function is not passed or has access to Bluetooth stack events.
   //         We will create/use a scheme that is far more energy efficient in
   //         later assignments.
-  for(uint32_t i=0;i<5000000;i++){__asm__("NOP");}
-  send_command_to_Si7021();
-  read_data_from_Si7021();
 
+  gpioLed1SetOn();
+  timerWaitUs(1000000);
+  gpioLed1SetOff();
+  timerWaitUs(1000000);
 } // app_process_action()
 
 

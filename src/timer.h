@@ -26,5 +26,5 @@ Function to configure LETIMER0 to generate interrupts at the user specified rate
 in this case 2.25s and blink an LED with a on time of 175ms
 */
 void letimer0_init(void);
-
+void timerWaitUs(uint32_t us_wait);
 #endif /* SRC_TIMER_H_ */

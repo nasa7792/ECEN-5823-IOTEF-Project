@@ -16,17 +16,9 @@ void enable_LETIMER0_interrupt(){
 
 void LETIMER0_IRQHandler(void)
 {
-    uint32_t flags = LETIMER_IntGet(LETIMER0);
-    //clear interrupts
-    LETIMER_IntClear(LETIMER0, flags);
-    //address interrupts
-    if (flags & LETIMER_IF_COMP0)
-    {
-        gpioLed0SetOff();
-
-    }
-    if(flags & LETIMER_IF_COMP1)
-    {
-        gpioLed0SetOn();
-    }
+  LETIMER_IntClear(LETIMER0, LETIMER_IF_UF);
+  static int state=0;
+  if(state==0)gpioLed1SetOn();
+  else gpioLed1SetOff();
+  state=!state;
 }
