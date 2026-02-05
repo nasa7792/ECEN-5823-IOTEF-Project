@@ -19,7 +19,8 @@
 #include "irq.h"
 #define LOAD_PWR_MGMT_SENSOR (80000)//80ms
 #define CONV_TIME (10500)
-//macros for comp register positions
+#define MAX_US_SUPPORTED ((uint32_t)((0xFFFF) /  (FEQ_OSC / PRE_SCALER_OSC))*CONVERT_US_TO_SEC)
+#define MIN_US_SUPPORTED ((uint32_t)((CONVERT_US_TO_SEC) /  (FEQ_OSC / PRE_SCALER_OSC)))
 
 
 /*

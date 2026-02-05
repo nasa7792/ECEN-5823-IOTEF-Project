@@ -23,7 +23,7 @@ extern I2CSPM_Init_TypeDef I2C_Config;
 #define SI7021_I2C_BUS_ADDRESS           0x40               /**< I2C bus address                        */
 #define SI7021_CMD_MEASURE_TEMP_NO_HOLD  0xF3               /**< Measure Temperature, No Hold Master Mode */
 #define SI7021_I2C_BUS_ADDRESS           0x40               /**< I2C bus address                        */
-
+#define MASK_TEMP 0XFFFC
 
 void initialize_I2C0();
 void enable_Si7021();

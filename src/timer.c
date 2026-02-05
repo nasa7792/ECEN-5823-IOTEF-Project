@@ -13,9 +13,19 @@
 void timerWaitUs(uint32_t us_wait){
 
   uint32_t letimer_freq = FEQ_OSC / PRE_SCALER_OSC;
+  //range check for a value which is over what we can support
+  //clamp down value
+  if(us_wait>MAX_US_SUPPORTED){
+      us_wait=MAX_US_SUPPORTED;
+  }
+  //range check for a value which is below what we can support
+  //clamp up value
+  if(us_wait<MIN_US_SUPPORTED){
+      us_wait=MIN_US_SUPPORTED;
+  }
 
   uint32_t REQ_TICKS_WAIT =
-      (letimer_freq * us_wait + 999999) / CONVERT_US_TO_SEC;
+      (letimer_freq * us_wait + (CONVERT_US_TO_SEC-1)) / CONVERT_US_TO_SEC;
 
   uint32_t prev_cnt = LETIMER_CounterGet(LETIMER0);
   uint32_t ticks_passed = 0;

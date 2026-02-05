@@ -42,7 +42,6 @@ void disable_Si7021(){
 void initialize_I2C0(){
   enable_Si7021();
   timerWaitUs(LOAD_PWR_MGMT_SENSOR);
-  LOG_INFO("Initliazing I2C0 \n \r");
   I2CSPM_Init(&I2C_Config);
 }
 
@@ -55,13 +54,12 @@ void send_command_to_Si7021(){
 
   transferStatus = I2CSPM_Transfer (I2C0, &transferSequence);
   if (transferStatus != i2cTransferDone) {
-   LOG_ERROR ("I2CSPM_Transfer: I2C bus write of cmd=?? failed");
+   LOG_ERROR ("I2CSPM_Transfer: I2C bus write of cmd=0xF3 failed with status code of %d \n \r",transferStatus);
   }
   timerWaitUs(CONV_TIME);
 }
 
 void read_data_from_Si7021(){
-  //for (uint32_t i = 0; i < 80000; i++);
   transferSequence.addr = SI7021_I2C_BUS_ADDRESS << 1; // shift device address left
   transferSequence.flags = I2C_FLAG_READ;
   transferSequence.buf[0].data =  buf; // pointer to data to write
@@ -69,18 +67,12 @@ void read_data_from_Si7021(){
 
   transferStatus = I2CSPM_Transfer (I2C0, &transferSequence);
   if (transferStatus != i2cTransferDone) {
-   LOG_ERROR ("I2CSPM_Transfer: I2C bus write of cmd=?? failed");
+   LOG_ERROR ("I2CSPM_Transfer: I2C bus read failed with status code of %d \n \r",transferStatus);
   }
-  // Combine bytes properly: MSB << 8 | LSB
   read_data = ((uint16_t)buf[0] << 8) | buf[1];
-
-  // Mask last 2 bits as per datasheet
-  uint16_t temp_code = read_data & 0xFFFC;
-
-  float temperature_c = ((175.72 * temp_code) / 65536.0) - 46.85;
-
-  LOG_INFO("Raw temperature MSB = 0x%02X, LSB = 0x%02X", buf[0], buf[1]);
-  LOG_INFO("Temperature value = %.6f °C", temperature_c);
+  uint16_t temp_masked = read_data & MASK_TEMP;
+  float temperature_c = ((175.72 * temp_masked) / 65536.0) - 46.85;
+  LOG_INFO("Temperature value = %.2f °C \n \r", temperature_c);
 }
 
 
