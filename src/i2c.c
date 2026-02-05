@@ -33,6 +33,7 @@ I2CSPM_Init_TypeDef I2C_Config = {
 
 void enable_Si7021(){
   GPIO_PinOutSet(TEMP_SENSOR_PORT, TEMP_SENSOR_ENABLE_PIN);
+
 }
 void disable_Si7021(){
   GPIO_PinOutClear(TEMP_SENSOR_PORT, TEMP_SENSOR_ENABLE_PIN);
@@ -40,7 +41,7 @@ void disable_Si7021(){
 
 void initialize_I2C0(){
   enable_Si7021();
-  for (uint32_t i = 0; i < 50000; i++);
+  timerWaitUs(LOAD_PWR_MGMT_SENSOR);
   LOG_INFO("Initliazing I2C0 \n \r");
   I2CSPM_Init(&I2C_Config);
 }
@@ -56,10 +57,11 @@ void send_command_to_Si7021(){
   if (transferStatus != i2cTransferDone) {
    LOG_ERROR ("I2CSPM_Transfer: I2C bus write of cmd=?? failed");
   }
+  timerWaitUs(CONV_TIME);
 }
 
 void read_data_from_Si7021(){
-  for (uint32_t i = 0; i < 80000; i++);
+  //for (uint32_t i = 0; i < 80000; i++);
   transferSequence.addr = SI7021_I2C_BUS_ADDRESS << 1; // shift device address left
   transferSequence.flags = I2C_FLAG_READ;
   transferSequence.buf[0].data =  buf; // pointer to data to write
@@ -82,3 +84,10 @@ void read_data_from_Si7021(){
 }
 
 
+void read_temp_from_si7021(){
+  enable_Si7021();
+  timerWaitUs(LOAD_PWR_MGMT_SENSOR);
+  send_command_to_Si7021();
+  read_data_from_Si7021();
+  disable_Si7021();
+}

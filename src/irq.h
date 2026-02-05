@@ -12,6 +12,7 @@
 
 #include"gpio.h"
 #include "em_letimer.h"
+#include"scheduler.h"
 
 /*
 call nvic functions to enable LETIMER0 INTERRUPT

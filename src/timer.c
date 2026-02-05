@@ -12,20 +12,26 @@
 
 void timerWaitUs(uint32_t us_wait){
 
-  uint32_t wait_time_sec=us_wait/CONVERT_US_TO_SEC;
-  uint32_t REQ_TICKS_WAIT=((FEQ_OSC * wait_time_sec) / (PRE_SCALER_OSC));
+  uint32_t letimer_freq = FEQ_OSC / PRE_SCALER_OSC;
 
-  uint32_t prev_tick_cnt = LETIMER_CounterGet(LETIMER0);
+  uint32_t REQ_TICKS_WAIT =
+      (letimer_freq * us_wait + 999999) / CONVERT_US_TO_SEC;
+
+  uint32_t prev_cnt = LETIMER_CounterGet(LETIMER0);
   uint32_t ticks_passed = 0;
 
-  while(ticks_passed<REQ_TICKS_WAIT){
-      uint32_t current_tick_cnt = LETIMER_CounterGet(LETIMER0);
-      if(current_tick_cnt!=prev_tick_cnt){
-          ticks_passed++;
-          prev_tick_cnt=current_tick_cnt;
-      }
-  }
+  while (ticks_passed < REQ_TICKS_WAIT) {
+    uint32_t curr_cnt = LETIMER_CounterGet(LETIMER0);
 
+    if (curr_cnt <= prev_cnt) {
+      ticks_passed += (prev_cnt - curr_cnt);
+    } else {
+      // underflow
+      ticks_passed += prev_cnt;
+    }
+
+    prev_cnt = curr_cnt;
+  }
 }
 
 void letimer0_init(void)
@@ -51,9 +57,9 @@ void letimer0_init(void)
     LETIMER_IntClear(LETIMER0, LETIMER_IF_UF);
 
     // Enable COMP0 and COMP1 interrupt
-    //LETIMER_IntEnable(LETIMER0, LETIMER_IEN_UF);
+    LETIMER_IntEnable(LETIMER0, LETIMER_IEN_UF);
 
-    //enable_LETIMER0_interrupt();
+    enable_LETIMER0_interrupt();
 
     // Start the timer
     LETIMER_Enable(LETIMER0, true);

@@ -17,8 +17,6 @@ void enable_LETIMER0_interrupt(){
 void LETIMER0_IRQHandler(void)
 {
   LETIMER_IntClear(LETIMER0, LETIMER_IF_UF);
-  static int state=0;
-  if(state==0)gpioLed1SetOn();
-  else gpioLed1SetOff();
-  state=!state;
+  scheduler_setEvent_get_temp();
+
 }

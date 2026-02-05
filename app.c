@@ -172,8 +172,7 @@ SL_WEAK void app_init(void)
 #endif
   gpioInit();
   letimer0_init();
-  //initialize_I2C0();
-
+  initialize_I2C0();
 } // app_init()
 
 
@@ -188,16 +187,15 @@ SL_WEAK void app_init(void)
  *****************************************************************************/
 SL_WEAK void app_process_action(void)
 {
-  // Put your application code here for A1 to A4.
-  // This is called repeatedly from the main while(1) loop
-  // Notice: This function is not passed or has access to Bluetooth stack events.
-  //         We will create/use a scheme that is far more energy efficient in
-  //         later assignments.
 
-  gpioLed1SetOn();
-  timerWaitUs(1000000);
-  gpioLed1SetOff();
-  timerWaitUs(1000000);
+  uint32_t evt;
+   evt = getNextEvent();
+   switch (evt) {
+   case evtMeasureTemp:
+   read_temp_from_si7021();
+   break;
+   }
+
 } // app_process_action()
 
 

@@ -17,9 +17,10 @@
 #include "oscillators.h"
 #include "app.h"
 #include "irq.h"
+#define LOAD_PWR_MGMT_SENSOR (80000)//80ms
+#define CONV_TIME (10500)
 //macros for comp register positions
-#define COMP0 0
-#define COMP1 1
+
 
 /*
 Function to configure LETIMER0 to generate interrupts at the user specified rate 
