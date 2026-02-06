@@ -189,10 +189,12 @@ SL_WEAK void app_process_action(void)
 {
 
   uint32_t evt;
-   evt = getNextEvent();
+   evt = getNextEvent(); //request next event
    switch (evt) {
    case evtMeasureTemp:
    read_temp_from_si7021();
+   break;
+   default:
    break;
    }
 

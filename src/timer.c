@@ -14,12 +14,12 @@ void timerWaitUs(uint32_t us_wait){
 
   uint32_t letimer_freq = FEQ_OSC / PRE_SCALER_OSC;
   //range check for a value which is over what we can support
-  //clamp down value
+  //clamp down value if crossing above bounds
   if(us_wait>MAX_US_SUPPORTED){
       us_wait=MAX_US_SUPPORTED;
   }
   //range check for a value which is below what we can support
-  //clamp up value
+  //clamp up value if below bounds
   if(us_wait<MIN_US_SUPPORTED){
       us_wait=MIN_US_SUPPORTED;
   }
@@ -36,7 +36,7 @@ void timerWaitUs(uint32_t us_wait){
     if (curr_cnt <= prev_cnt) {
       ticks_passed += (prev_cnt - curr_cnt);
     } else {
-      // underflow
+      // underflow occured went to 0
       ticks_passed += prev_cnt;
     }
 
@@ -49,7 +49,7 @@ void letimer0_init(void)
 
     select_oscillator(); // based on the current EM configure our oscillator
     /*
-    calculate the number of timer ticks for led period and the led on time
+    calculate the number of timer ticks for requested period
     */
     uint32_t REQ_TICKS_SAMPLING= ((FEQ_OSC * LETIMER_PERIOD_MS) / (PRE_SCALER_OSC))/CONVERT_MS_TO_SEC;
     LETIMER_Init_TypeDef letimerInit = LETIMER_INIT_DEFAULT;
