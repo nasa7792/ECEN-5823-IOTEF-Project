@@ -11,11 +11,14 @@
 #define SRC_IRQ_H_
 
 #include"gpio.h"
+#include "i2c.h"
 #include "em_letimer.h"
 #include"scheduler.h"
+
 
 /*
 call nvic functions to enable LETIMER0 INTERRUPT
 */
 void enable_LETIMER0_interrupt();
+uint32_t letimerMilliseconds(void);
 #endif /* SRC_IRQ_H_ */

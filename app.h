@@ -71,7 +71,7 @@ we need to conditionally define the macro for oscillator frequency so code remai
   #define FEQ_OSC (32768)
 #endif
 //slow down the clock with the help of prescaler
-#define PRE_SCALER_OSC (4)
+#define PRE_SCALER_OSC (2)
 
 
 

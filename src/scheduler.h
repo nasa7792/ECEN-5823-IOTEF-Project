@@ -13,8 +13,11 @@
 
 typedef enum
 {
-    evtMeasureTemp = (1U << 0), // 0b0001
+    evtLETIMER0_UnderFlow=(1U << 0),
+    evtLETIMER0_Comp1=(1U << 1),
+    evtI2CTransferComplete=(1U << 2)
 } event_list;
+
 
 /*
 checks the schedulerEvents variable to figure out which event should be addressed next
@@ -23,5 +26,7 @@ uint32_t getNextEvent();
 /*
 called from timer0 irq and sets the evtMeasureTemp event
 */
-void scheduler_setEvent_get_temp();
+void scheduler_setEvent_UnderFlow();
+void scheduler_setEvent_COMP1();
+void scheduler_setEvent_I2C_Transfer_Complete();
 #endif /* SRC_SCHEDULER_H_ */

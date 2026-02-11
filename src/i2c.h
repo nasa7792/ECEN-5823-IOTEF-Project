@@ -13,6 +13,8 @@
 
 #include "sl_i2cspm.h"
 #include "gpio.h"
+#include "em_core.h"
+#include "em_i2c.h"
 #include "timer.h"
 #include "em_core_generic.h"
 #include "sl_i2cspm_sensor_config.h"
@@ -50,9 +52,5 @@ void send_command_to_Si7021();
 reads the temperature data from the Si7021 sensor
 */
 void read_data_from_Si7021();
-/*
-combined routine called from the schdeuler to enable the Si7021 sensor, send temp command,
-wait for converison period, read data and log value, and finally disable the sensor
-*/
-void read_temp_from_si7021();
+void process_temperature_reading();
 #endif /* SRC_I2C_H_ */

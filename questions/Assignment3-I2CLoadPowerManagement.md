@@ -17,7 +17,7 @@ See [Mastering Markdown](https://guides.github.com/features/mastering-markdown/)
 <img width="1912" height="733" alt="image" src="https://github.com/user-attachments/assets/9d4e59fa-b9fc-4bd4-88c9-8d9308746861" />
 
    
-3. What is the ave current from the time we power-on the 7021 until the polled implementation of timerWaitUs() returns, indicating that the 7021's maximum time for conversion (measurement) has expired.
+3. What is the ave current from the time we power-on the 7021 until the polled implementation of timerWaitUs_polled() returns, indicating that the 7021's maximum time for conversion (measurement) has expired.
    Answer: 5.08mA
    <br>Screenshot:  
 <img width="1053" height="591" alt="image" src="https://github.com/user-attachments/assets/5b774f73-08ef-4094-8e37-189e3a904f8a" />

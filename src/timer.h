@@ -32,5 +32,7 @@ void letimer0_init(void);
 /*
  * A function to busy wait for the requested number of us_wait with the help of letimer0
  * */
-void timerWaitUs(uint32_t us_wait);
+void timerWaitUs_polled(uint32_t us_wait);
+void timerWaitUs_irq(uint32_t us_wait);
+void set_delay_expired();
 #endif /* SRC_TIMER_H_ */
