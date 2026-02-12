@@ -4,6 +4,8 @@
  *  Created on: Jan 25, 2026
  *      Author: Nalin Saxena
  *
+ * Edited on - 2/12/2026
+ * 
  * File Brief -Header file for LETIMER0 related apis. Contains function declarations related
  * to timer initlization
  */
@@ -17,14 +19,13 @@
 #include "oscillators.h"
 #include "app.h"
 #include "irq.h"
-#define LOAD_PWR_MGMT_SENSOR (80000)//80ms max time to turn on temp Si7021
-#define CONV_TIME (10800) // as per data sheet 10. is conversion time for sensor
-#define MAX_US_SUPPORTED ((uint32_t)((0xFFFF) /  (FEQ_OSC / PRE_SCALER_OSC))*CONVERT_US_TO_SEC) // this is the max wait time supported
-#define MIN_US_SUPPORTED ((uint32_t)((CONVERT_US_TO_SEC) /  (FEQ_OSC / PRE_SCALER_OSC))) // this is the min wait time supported
-
+#define LOAD_PWR_MGMT_SENSOR (80000)                                                    // 80ms max time to turn on temp Si7021
+#define CONV_TIME (10800)                                                               // as per data sheet 10.8 is conversion time for sensor
+#define MAX_US_SUPPORTED ((uint32_t)(LETIMER_PERIOD_MS * CONVERT_MS_TO_SEC))                        // this is the max wait time supported we cannot support than period of UF
+#define MIN_US_SUPPORTED ((uint32_t)((CONVERT_US_TO_SEC) / (FEQ_OSC / PRE_SCALER_OSC))) // this is the min wait time supported
 
 /*
-Function to configure LETIMER0 to generate interrupts at the user specified rate 
+Function to configure LETIMER0 to generate interrupts at the user specified rate
 in this case 3s and request a temp measurement
 */
 void letimer0_init(void);

@@ -52,5 +52,9 @@ void send_command_to_Si7021();
 reads the temperature data from the Si7021 sensor
 */
 void read_data_from_Si7021();
+
+/*
+a small helper function to deal with raw values to temperature conversion
+*/
 void process_temperature_reading();
 #endif /* SRC_I2C_H_ */

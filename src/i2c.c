@@ -43,6 +43,8 @@ void disable_Si7021()
 // called during setup
 void initialize_I2C0()
 {
+  //enable_Si7021();
+ // timerWaitUs_polled(LOAD_PWR_MGMT_SENSOR); // no polling allowed
   I2CSPM_Init(&I2C_Config);
 }
 
@@ -80,16 +82,12 @@ void read_data_from_Si7021()
   transferSequence.buf[0].data = buf;                  // pointer to data to write
   transferSequence.buf[0].len = 2;
   NVIC_EnableIRQ(I2C0_IRQn);
+  sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
   transferStatus = I2C_TransferInit(I2C0, &transferSequence);
   // check status of transfer done, and log error
   if (transferStatus < 0)
   {
     LOG_ERROR("I2CSPM_Transfer: I2C bus read failed with status code of %d \n \r", transferStatus);
   }
-  read_data = ((uint16_t)buf[0] << 8) | buf[1];
-  uint16_t temp_masked = read_data & MASK_TEMP;
-  // macros for these values ask TA ??
-  float temperature_c = ((175.72 * temp_masked) / 65536.0) - 46.85;
-  // log temperature value
-  LOG_INFO("Temperature value = %.2f °C t-stamp %lu \n \r", temperature_c, loggerGetTimestamp());
+  //why did things go wrong when process_temperature_reading was called here ?
 }

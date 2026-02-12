@@ -20,5 +20,9 @@
 call nvic functions to enable LETIMER0 INTERRUPT
 */
 void enable_LETIMER0_interrupt();
+
+/*
+a timestamp helper function to count ms elapsed
+*/
 uint32_t letimerMilliseconds(void);
 #endif /* SRC_IRQ_H_ */

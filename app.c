@@ -186,12 +186,13 @@ SL_WEAK void app_init(void)
 * Application Process Action.
 *****************************************************************************/
 
-
+//our possible states
 typedef enum uint32_t {
 STATE0_WARMUP,
 STATE1_I2C_WRITE,
 STATE2_INITIATE_CONVERSION,
 STATE3_I2C_READ_TEMP,
+STATE4_POWER_DOWN
 } State_t;
 
 
@@ -203,6 +204,7 @@ currentState = nextState;
 switch (currentState)
 {
 case STATE0_WARMUP:
+//at each uf event we enable sensor and arm the comp1 event to fire at 80ms
 if (event == evtLETIMER0_UnderFlow) {
 enable_Si7021();
 timerWaitUs_irq(LOAD_PWR_MGMT_SENSOR);
@@ -211,14 +213,15 @@ nextState = STATE1_I2C_WRITE;
 break;
 
 case STATE1_I2C_WRITE:
+//comp1 event recieved send write command to sensor
 if (event == evtLETIMER0_Comp1) {
       sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
      send_command_to_Si7021();
      nextState = STATE2_INITIATE_CONVERSION;
 }
-
 break;
 case STATE2_INITIATE_CONVERSION:
+//i2c complete event recieved disable nvic i2c, and arm timer for conversion 
   if(event == evtI2CTransferComplete){
       sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
       NVIC_DisableIRQ(I2C0_IRQn);
@@ -227,15 +230,19 @@ case STATE2_INITIATE_CONVERSION:
   }
 break;
 case STATE3_I2C_READ_TEMP:
+//conversion completed, move to power down state
    if (event == evtLETIMER0_Comp1) {
-       sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
        read_data_from_Si7021();
+       nextState=STATE4_POWER_DOWN;
    }
-   else if (event == evtI2CTransferComplete) {
-       sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
+   break;
+case STATE4_POWER_DOWN:
+//log values on terminal, disable sensor,go back to warm up state
+  if (event == evtI2CTransferComplete) {
+      sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
+       disable_Si7021();
        process_temperature_reading();  // 
        NVIC_DisableIRQ(I2C0_IRQn);
-       disable_Si7021();
        nextState = STATE0_WARMUP;
    }
    break;

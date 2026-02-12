@@ -3,6 +3,8 @@
  *
  *  Created on: Jan 25, 2026
  *      Author: Nalin Saxena
+ * 
+ * Edited on - 2/12/2026
  *
  * File Brief -Implementation file for LETIMER0 related apis. Contains function implementation related
  * to timer initlization and configuring interrupts at the correct frequency
@@ -75,7 +77,7 @@ void timerWaitUs_irq(uint32_t us_wait)
   if (curr_cnt >= REQ_TICKS_WAIT) {
       comp1_val = curr_cnt - REQ_TICKS_WAIT;
   } else {
-      // 
+      // in case pf wrap around
       comp1_val = comp0_val - (REQ_TICKS_WAIT - curr_cnt);
   }
 
@@ -84,7 +86,7 @@ void timerWaitUs_irq(uint32_t us_wait)
 
   LETIMER_CompareSet(LETIMER0, 1, comp1_val);
 
-  // Enable COMP1 interrupt
+  // Enable COMP1 interrupt generation
   LETIMER_IntEnable(LETIMER0, LETIMER_IEN_COMP1);
 }
 
@@ -110,7 +112,7 @@ void letimer0_init(void)
   LETIMER_CompareSet(LETIMER0, 0, REQ_TICKS_SAMPLING);
   LETIMER_IntClear(LETIMER0, LETIMER_IF_UF | LETIMER_IF_COMP1);
 
-  //enable uf interrupt this will be the hearbeat of the fsm
+  //enable uf interrupt this will be the hearbeat of the fsm, we will enable comp1 via interrupt
   LETIMER_IntEnable(LETIMER0, LETIMER_IEN_UF);
 
   enable_LETIMER0_interrupt();

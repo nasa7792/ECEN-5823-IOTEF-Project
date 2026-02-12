@@ -26,7 +26,7 @@ void LETIMER0_IRQHandler(void)
   if ((flags & LETIMER_IF_UF) && (enabled & LETIMER_IF_UF))
   {
     LETIMER_IntClear(LETIMER0, LETIMER_IF_UF);
-    elapsed_ms++;
+    elapsed_ms++; // helps count up the timestamp value
     scheduler_setEvent_UnderFlow();
   }
 
@@ -38,6 +38,7 @@ void LETIMER0_IRQHandler(void)
   }
 }
 
+// i2c event handler
 void I2C0_IRQHandler(void)
 {
   // this can be locally defined
@@ -57,11 +58,11 @@ void I2C0_IRQHandler(void)
   }
   if (transferStatus < 0)
   {
-    LOG_ERROR("%d", transferStatus);
+    LOG_ERROR("I2C transaction failed with error code -> %d", transferStatus);
   }
 } // I2C0_IRQHandler()
 
 uint32_t letimerMilliseconds(void)
 {
-  return elapsed_ms * 3;
+  return elapsed_ms * 3; //each tick is 3seconds
 }
