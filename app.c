@@ -255,12 +255,7 @@ break;
 SL_WEAK void app_process_action(void)
 {
 
-  uint32_t evt;
-  //LOG_INFO("New log \n \r");
-  // Get the next event from the scheduler
-  evt = getNextEvent();
-  state_machine(evt);
-
+// deleted all code inside the app_process_action
 
 } // app_process_action()
 
@@ -288,7 +283,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
   // Some events require responses from our application code,
   // and don’t necessarily advance our state machines.
   // For A5 uncomment the next 2 function calls
-  // handle_ble_event(evt); // put this code in ble.c/.h
+   handle_ble_event(evt); // put this code in ble.c/.h
 
   // sequence through states driven by events
   // state_machine(evt);    // put this code in scheduler.c/.h
