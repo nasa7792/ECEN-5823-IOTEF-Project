@@ -2,7 +2,7 @@
  * ble.h
  *
  *  Created on: Feb 15, 2026
- *      Author: Asus
+ *      Author: Nalin Saxena
  */
 
 #ifndef SRC_BLE_H_

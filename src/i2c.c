@@ -43,8 +43,8 @@ void disable_Si7021()
 // called during setup
 void initialize_I2C0()
 {
-  //enable_Si7021();
- // timerWaitUs_polled(LOAD_PWR_MGMT_SENSOR); // no polling allowed
+  // enable_Si7021();
+  // timerWaitUs_polled(LOAD_PWR_MGMT_SENSOR); // no polling allowed
   I2CSPM_Init(&I2C_Config);
 }
 
@@ -72,7 +72,56 @@ void process_temperature_reading()
   read_data = ((uint16_t)buf[0] << 8) | buf[1];
   uint16_t temp_masked = read_data & MASK_TEMP;
   float temperature_c = ((175.72 * temp_masked) / 65536.0) - 46.85;
-  LOG_INFO("Temperature value = %.2f °C tstamp %lu \n \r", temperature_c, loggerGetTimestamp());
+
+  uint8_t htm_temperature_buffer[5];
+  memset(htm_temperature_buffer, 0, sizeof(htm_temperature_buffer));
+  uint8_t *p = &htm_temperature_buffer[0];
+  uint32_t htm_temperature_flt;
+  uint8_t flags = 0x00;
+  UINT8_TO_BITSTREAM(p, flags); // insert the flags byte
+  int32_t temperature_mC = (int32_t)(temperature_c * 1000.0f);
+  htm_temperature_flt = INT32_TO_FLOAT(temperature_mC, -3);
+
+  // insert the temperature measurement
+  UINT32_TO_BITSTREAM(p, htm_temperature_flt);
+
+  sl_status_t sc;
+
+  // -------------------------------
+  // Write our local GATT DB
+  // -------------------------------
+  sc = sl_bt_gatt_server_write_attribute_value(
+      gattdb_temperature_measurement, // handle from gatt_db.h
+      0,
+      5,
+      &htm_temperature_buffer[0] // in IEEE-11073 format
+  );
+  if (sc != SL_STATUS_OK)
+  {
+    LOG_ERROR("sl_bt_gatt_server_write_attribute_value failed with status code of status=0x%04x  \n \r", (unsigned int)sc);
+  }
+
+  ble_data_struct_t *ble = getBleDataPtr();
+
+  if (ble->connectionOpen &&
+      ble->htmIndicationsEnabled &&
+      !ble->is_Indication_Inflight)
+  {
+    sc = sl_bt_gatt_server_send_indication(
+        ble->connectionHandle,
+        gattdb_temperature_measurement, // handle from gatt_db.h
+        5,
+        &htm_temperature_buffer[0] // in IEEE-11073 format
+    );
+    if (sc != SL_STATUS_OK)
+    {
+      LOG_ERROR("sl_bt_gatt_server_send_indication failed with status code of status=0x%04x  \n \r", (unsigned int)sc);
+    }
+    else
+    {
+      ble->is_Indication_Inflight = true;
+    }
+  }
 }
 
 void read_data_from_Si7021()
@@ -89,5 +138,5 @@ void read_data_from_Si7021()
   {
     LOG_ERROR("I2CSPM_Transfer: I2C bus read failed with status code of %d \n \r", transferStatus);
   }
-  //why did things go wrong when process_temperature_reading was called here ?
+  // why did things go wrong when process_temperature_reading was called here ?
 }

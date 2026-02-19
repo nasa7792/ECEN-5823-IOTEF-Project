@@ -216,6 +216,4 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
   (void) evt;
    handle_ble_event(evt); // put this code in ble.c/.h
    state_machine(evt);    // put this code in scheduler.c/.h
-
-
 } // sl_bt_on_event()

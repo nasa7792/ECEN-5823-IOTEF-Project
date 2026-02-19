@@ -14,6 +14,7 @@
 #include "sl_i2cspm.h"
 #include "gpio.h"
 #include "em_core.h"
+#include "string.h"
 #include "em_i2c.h"
 #include "timer.h"
 #include "em_core_generic.h"
