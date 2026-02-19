@@ -4,7 +4,8 @@
  *  Created on: Feb 4, 2026
  *      Author: Nalin Saxena
  *
- *  Edited on - 2/12/2026
+ *  Edited on - 2/18/2026
+ * 
  *
  * File Brief -implementation file for scheduler related apis. Contains function defs related
  * to scheduler events
@@ -57,7 +58,7 @@ void state_machine(sl_bt_msg_t *evt)
   static State_t nextState = STATE0_WARMUP;
   State_t currentState = nextState;
 
-  // we only react to external signals now
+  // we only react to external signals now getnextevent is dead
   if (SL_BT_MSG_ID(evt->header) != sl_bt_evt_system_external_signal_id)
     return;
 

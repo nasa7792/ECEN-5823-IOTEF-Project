@@ -3,6 +3,8 @@
  *
  *  Created on: Feb 15, 2026
  *      Author: Nalin Saxena
+ *
+ *  File Brief- Implementation file for All BLE related Apis, and helper macros
  */
 #define INCLUDE_LOG_DEBUG 1
 #include "log.h"
@@ -45,8 +47,8 @@ void handle_ble_event(sl_bt_msg_t *evt)
         ble_data.advertisingSetHandle,
         400, // min interval = 250ms
         400, // max interval = 250ms
-        0,   // duration (0 = forever)
-        0);  // max events (0 = unlimited)
+        0,
+        0);
     app_assert_status(sc);
     if (sc != SL_STATUS_OK)
     {
@@ -69,10 +71,11 @@ void handle_ble_event(sl_bt_msg_t *evt)
     break;
 
   case sl_bt_evt_connection_opened_id:
+    // mark connection as open
     ble_data.connectionOpen = true;
     ble_data.connectionHandle = evt->data.evt_connection_opened.connection;
 
-    // stop advertising
+    // stop advertising, since we already have an active connection
     sc = sl_bt_advertiser_stop(ble_data.advertisingSetHandle);
     if (sc != SL_STATUS_OK)
     {
@@ -94,21 +97,24 @@ void handle_ble_event(sl_bt_msg_t *evt)
     }
     break;
 
-  case sl_bt_evt_connection_parameters_id:{
+  // as instructed by the assignment this is an informational event, and logs have been commented out
+  case sl_bt_evt_connection_parameters_id:
+  {
     uint32_t interval_ms = (evt->data.evt_connection_parameters.interval * 5) / 4;
-    uint32_t timeout_ms  = evt->data.evt_connection_parameters.timeout * 10;
+    uint32_t timeout_ms = evt->data.evt_connection_parameters.timeout * 10;
 
-//    LOG_INFO("Interval: %lu ms Latency: %lu Timeout: %lu ms",
-//             interval_ms,
-//             evt->data.evt_connection_parameters.latency,
-//             timeout_ms);
+    //    LOG_INFO("Interval: %lu ms Latency: %lu Timeout: %lu ms",
+    //             interval_ms,
+    //             evt->data.evt_connection_parameters.latency,
+    //             timeout_ms);
   }
-    break;
+  break;
 
   case sl_bt_evt_connection_closed_id:
+    // on receiving close event mark connection open as false
     ble_data.connectionOpen = false;
     ble_data.connectionHandle = 0;
-
+    // restart advertising !
     sc = sl_bt_advertiser_start(
         ble_data.advertisingSetHandle,
         sl_bt_advertiser_general_discoverable,
@@ -123,7 +129,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
     break;
 
   case sl_bt_evt_gatt_server_characteristic_status_id:
-    {
+  {
     uint16_t characteristic = evt->data.evt_gatt_server_characteristic_status.characteristic;
     uint8_t sf = evt->data.evt_gatt_server_characteristic_status.status_flags;
     uint16_t ccf = evt->data.evt_gatt_server_characteristic_status.client_config_flags;
@@ -143,13 +149,14 @@ void handle_ble_event(sl_bt_msg_t *evt)
         }
       }
     }
-
+    // once confirmation is recieved mark, inflight as false
     if (sf == sl_bt_gatt_server_confirmation)
     {
       ble_data.is_Indication_Inflight = false;
     }
-}
-    break;
+  }
+  break;
+  // on timeout mark indication inflight as false
   case sl_bt_evt_gatt_server_indication_timeout_id:
     ble_data.is_Indication_Inflight = false;
     break;
@@ -157,7 +164,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
     break;
   }
 }
-  ble_data_struct_t *getBleDataPtr()
-  {
-    return (&ble_data);
-  }
+ble_data_struct_t *getBleDataPtr()
+{
+  return (&ble_data); // a handler for the ble ptr;
+}

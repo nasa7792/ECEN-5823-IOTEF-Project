@@ -29,6 +29,10 @@ checks the schedulerEvents variable to figure out which event should be addresse
 uint32_t getNextEvent();
 
 /*
+scheduler_setEvent_XXX() will now be handled via the sl_bt_external_signal calls
+*/
+
+/*
 called from LETimer0 irq and sets the evtLETIMER0_Comp1 event
 */
 void scheduler_setEvent_UnderFlow();
@@ -43,5 +47,10 @@ called from i2c event handler irq and sets the evtI2CTransferComplete event
 */
 void scheduler_setEvent_I2C_Transfer_Complete();
 
+
+/*
+a modified version of the state machine from a4, 
+the state machine is now driven by ble events
+*/
 void state_machine (sl_bt_msg_t *evt);
 #endif /* SRC_SCHEDULER_H_ */

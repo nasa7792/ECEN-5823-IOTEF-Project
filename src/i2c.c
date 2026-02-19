@@ -74,9 +74,11 @@ void process_temperature_reading()
   float temperature_c = ((175.72 * temp_masked) / 65536.0) - 46.85;
 
   uint8_t htm_temperature_buffer[5];
+  //init the htm temperature buffer as 0
   memset(htm_temperature_buffer, 0, sizeof(htm_temperature_buffer));
   uint8_t *p = &htm_temperature_buffer[0];
   uint32_t htm_temperature_flt;
+  //this means its Celsius  
   uint8_t flags = 0x00;
   UINT8_TO_BITSTREAM(p, flags); // insert the flags byte
   int32_t temperature_mC = (int32_t)(temperature_c * 1000.0f);
@@ -102,7 +104,7 @@ void process_temperature_reading()
   }
 
   ble_data_struct_t *ble = getBleDataPtr();
-
+  //make sure indications are enabled, and active connection is in place and we dont have a previous packet in flight
   if (ble->connectionOpen &&
       ble->htmIndicationsEnabled &&
       !ble->is_Indication_Inflight)
