@@ -25,7 +25,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
   case sl_bt_evt_system_boot_id:
 
     // Print stack version
-    LOG_INFO("Bluetooth stack booted: v%d.%d.%d-b%d\n",
+    LOG_INFO("Bluetooth stack booted: v%d.%d.%d-b%d \n \r",
              evt->data.evt_system_boot.major,
              evt->data.evt_system_boot.minor,
              evt->data.evt_system_boot.patch,
@@ -35,7 +35,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
     sc = sl_bt_system_get_identity_address(&address, &address_type);
     if (sc != SL_STATUS_OK)
     {
-      LOG_ERROR("sl_bt_system_get_identity_address() returned != 0 status=0x%04x", (unsigned int)sc);
+      LOG_ERROR("sl_bt_system_get_identity_address() returned != 0 status=0x%04x  \n \r", (unsigned int)sc);
     }
     app_assert_status(sc);
     ble_data.myAddress = address;
@@ -49,7 +49,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
     sc = sl_bt_advertiser_create_set(&ble_data.advertisingSetHandle);
     if (sc != SL_STATUS_OK)
     {
-      LOG_ERROR("sl_bt_advertiser_create_set() returned != 0 status=0x%04x", (unsigned int)sc);
+      LOG_ERROR("sl_bt_advertiser_create_set() returned != 0 status=0x%04x  \n \r", (unsigned int)sc);
     }
     app_assert_status(sc);
 
@@ -63,7 +63,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
     app_assert_status(sc);
     if (sc != SL_STATUS_OK)
     {
-      LOG_ERROR("sl_bt_advertiser_set_timing() returned != 0 status=0x%04x", (unsigned int)sc);
+      LOG_ERROR("sl_bt_advertiser_set_timing() returned != 0 status=0x%04x  \n \r", (unsigned int)sc);
     }
 
     // Start advertising (connectable & scannable)
@@ -74,7 +74,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
 
     if (sc != SL_STATUS_OK)
     {
-      LOG_ERROR("sl_bt_advertiser_start() returned != 0 status=0x%04x", (unsigned int)sc);
+      LOG_ERROR("sl_bt_advertiser_start() returned != 0 status=0x%04x  \n \r", (unsigned int)sc);
     }
 
     app_assert_status(sc);
@@ -85,26 +85,88 @@ void handle_ble_event(sl_bt_msg_t *evt)
   case sl_bt_evt_connection_opened_id:
     LOG_INFO("A new connection was opened ! stopping advertising \n \r");
 
-    ble_data.connectionOpen=true;
-    ble_data.connectionHandle=evt->data.evt_connection_opened.connection;
+    ble_data.connectionOpen = true;
+    ble_data.connectionHandle = evt->data.evt_connection_opened.connection;
 
-    //stop advertising
-    sc=sl_bt_advertiser_stop(ble_data.advertisingSetHandle);
+    // stop advertising
+    sc = sl_bt_advertiser_stop(ble_data.advertisingSetHandle);
+    if (sc != SL_STATUS_OK)
+    {
+      LOG_ERROR("sl_bt_advertiser_stop() returned != 0 status=0x%04x  \n \r", (unsigned int)sc);
+    }
 
     sc = sl_bt_connection_set_parameters(
-             ble_data.connectionHandle,
-             60,    // min interval = 75ms (1.25ms units)
-             60,    // max interval = 75ms
-             3,     // latency = 3 slave intervals
-             75,    // timeout = 750ms (10ms units)
-             0,     // min CE length
-             0xffff); // max CE length
+        ble_data.connectionHandle,
+        60,      // min interval = 75ms (1.25ms units)
+        60,      // max interval = 75ms
+        3,       // latency = 3 slave intervals
+        75,      // timeout = 750ms (10ms units)
+        0,       // min CE length
+        0xffff); // max CE length
+    app_assert_status(sc);
+    if (sc != SL_STATUS_OK)
+    {
+      LOG_ERROR("sl_bt_connection_set_parameters() returned != 0 status=0x%04x  \n \r", (unsigned int)sc);
+    }
+    break;
+  case sl_bt_evt_connection_closed_id:
+    LOG_INFO("A connection was closed ! \n \r");
+    ble_data.connectionOpen = false;
+    ble_data.connectionHandle = 0;
+
+    sc = sl_bt_advertiser_start(
+        ble_data.advertisingSetHandle,
+        sl_bt_advertiser_general_discoverable,
+        sl_bt_advertiser_connectable_scannable);
+
+    if (sc != SL_STATUS_OK)
+    {
+      LOG_ERROR("sl_bt_advertiser_start() returned != 0 status=0x%04x  \n \r", (unsigned int)sc);
+    }
+
     app_assert_status(sc);
 
+    LOG_INFO("Started advertising\n");
     break;
+  case sl_bt_evt_gatt_server_characteristic_status_id:
+    LOG_INFO("CCCD change requested ! \n \r");
+    uint16_t characteristic = evt->data.evt_gatt_server_characteristic_status.characteristic;
+    uint8_t sf = evt->data.evt_gatt_server_characteristic_status.status_flags;
+    uint16_t ccf = evt->data.evt_gatt_server_characteristic_status.client_config_flags;
+    // client requested a change ?
+    if (sf == sl_bt_gatt_server_client_config)
+    {
+      // Dealing with temperature values ??
+      if (characteristic == gattdb_temperature_measurement)
+      {
+        if (ccf == sl_bt_gatt_server_indication)
+        {
+          ble_data.htmIndicationsEnabled = true;
+          LOG_INFO("Enabling  indications as requested ! \n \r");
+        }
+        else
+        {
+          ble_data.htmIndicationsEnabled = false;
+        }
+      }
+    }
 
-  break;
+    if (sf == sl_bt_gatt_server_confirmation)
+    {
+      ble_data.is_Indication_Inflight = true;
+    }
+    break;
+  case sl_bt_evt_gatt_server_indication_timeout_id:
+  {
+
+    ble_data.is_Indication_Inflight = false;
+    break;
   default:
     break;
   }
+  }
 }
+  ble_data_struct_t *getBleDataPtr()
+  {
+    return (&ble_data);
+  } // getBleDataPtr()

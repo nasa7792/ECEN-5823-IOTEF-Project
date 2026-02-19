@@ -9,6 +9,7 @@
 #define SRC_BLE_H_
 #include"app_assert.h"
 #include"sl_bt_api.h"
+#include"gatt_db.h"
 
 #define UINT8_TO_BITSTREAM(p, n) \
     {                            \
@@ -35,11 +36,16 @@ typedef struct
     // The advertising set handle allocated from Bluetooth stack.
     uint8_t advertisingSetHandle;
     uint8_t connectionHandle;
+    bool htmIndicationsEnabled;
+    bool is_Indication_Inflight;
     bool connectionOpen;
 
     // values unique for client
 } ble_data_struct_t;
 
 void handle_ble_event(sl_bt_msg_t *evt);
+
+//a getter function for ble data ptr
+ble_data_struct_t* getBleDataPtr();
 
 #endif /* SRC_BLE_H_ */

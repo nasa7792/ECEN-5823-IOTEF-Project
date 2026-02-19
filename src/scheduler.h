@@ -13,6 +13,7 @@
 #ifndef SRC_SCHEDULER_H_
 #define SRC_SCHEDULER_H_
 #include "em_core_generic.h"
+#include "sl_bt_api.h"
 
 typedef enum
 {   //as per assignmnet documents we need to support 3 events
@@ -41,4 +42,6 @@ void scheduler_setEvent_COMP1();
 called from i2c event handler irq and sets the evtI2CTransferComplete event
 */
 void scheduler_setEvent_I2C_Transfer_Complete();
+
+void state_machine (sl_bt_msg_t *evt);
 #endif /* SRC_SCHEDULER_H_ */

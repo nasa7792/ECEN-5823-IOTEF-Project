@@ -186,70 +186,6 @@ SL_WEAK void app_init(void)
 * Application Process Action.
 *****************************************************************************/
 
-//our possible states
-typedef enum uint32_t {
-STATE0_WARMUP,
-STATE1_I2C_WRITE,
-STATE2_INITIATE_CONVERSION,
-STATE3_I2C_READ_TEMP,
-STATE4_POWER_DOWN
-} State_t;
-
-
-void state_machine (uint32_t event) {
-State_t currentState;
-static State_t nextState = STATE0_WARMUP;
-currentState = nextState;
-
-switch (currentState)
-{
-case STATE0_WARMUP:
-//at each uf event we enable sensor and arm the comp1 event to fire at 80ms
-if (event == evtLETIMER0_UnderFlow) {
-enable_Si7021();
-timerWaitUs_irq(LOAD_PWR_MGMT_SENSOR);
-nextState = STATE1_I2C_WRITE;
-}
-break;
-
-case STATE1_I2C_WRITE:
-//comp1 event recieved send write command to sensor
-if (event == evtLETIMER0_Comp1) {
-      sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
-     send_command_to_Si7021();
-     nextState = STATE2_INITIATE_CONVERSION;
-}
-break;
-case STATE2_INITIATE_CONVERSION:
-//i2c complete event recieved disable nvic i2c, and arm timer for conversion 
-  if(event == evtI2CTransferComplete){
-      sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
-      NVIC_DisableIRQ(I2C0_IRQn);
-      timerWaitUs_irq(CONV_TIME);
-      nextState=STATE3_I2C_READ_TEMP;
-  }
-break;
-case STATE3_I2C_READ_TEMP:
-//conversion completed, move to power down state
-   if (event == evtLETIMER0_Comp1) {
-       read_data_from_Si7021();
-       nextState=STATE4_POWER_DOWN;
-   }
-   break;
-case STATE4_POWER_DOWN:
-//log values on terminal, disable sensor,go back to warm up state
-  if (event == evtI2CTransferComplete) {
-      sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
-       disable_Si7021();
-       process_temperature_reading();  // 
-       NVIC_DisableIRQ(I2C0_IRQn);
-       nextState = STATE0_WARMUP;
-   }
-   break;
-default:
-break;
-} // switch
-} // state_machine()
 
 
 SL_WEAK void app_process_action(void)
@@ -278,15 +214,8 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 
   // Just a trick to hide a compiler warning about unused input parameter evt.
   (void) evt;
-
-  // For A5 onward:
-  // Some events require responses from our application code,
-  // and don’t necessarily advance our state machines.
-  // For A5 uncomment the next 2 function calls
    handle_ble_event(evt); // put this code in ble.c/.h
-
-  // sequence through states driven by events
-  // state_machine(evt);    // put this code in scheduler.c/.h
+   state_machine(evt);    // put this code in scheduler.c/.h
 
 
 } // sl_bt_on_event()

@@ -49,6 +49,7 @@
 #define APP_H
 #include"src/i2c.h"
 #include "src/scheduler.h"
+#include "src/ble.h"
 
 #define LOWEST_ENERGY_MODE (2) // change this to switch b/w modes
 #define LETIMER_PERIOD_MS (3030) //sensor sampling time as specified by A3
