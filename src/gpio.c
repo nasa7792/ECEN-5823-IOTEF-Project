@@ -86,6 +86,24 @@ void gpioLed1SetOff()
 }
 
 
+void enable_display()
+{
+  GPIO_PinOutSet(TEMP_SENSOR_PORT, TEMP_SENSOR_ENABLE_PIN);
+}
+void disable_display()
+{
+  GPIO_PinOutClear(TEMP_SENSOR_PORT, TEMP_SENSOR_ENABLE_PIN);
+}
+
+void gpioSetDisplayExtcomin(bool value){
+  if(!value){
+      GPIO_PinOutClear(TEMP_SENSOR_PORT,DISP_EXTCOMIN);
+  }
+  else{
+      GPIO_PinOutSet(TEMP_SENSOR_PORT,DISP_EXTCOMIN);
+  }
+}
+
 
 
 

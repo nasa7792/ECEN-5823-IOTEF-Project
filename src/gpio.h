@@ -28,6 +28,7 @@
 
 #ifndef SRC_GPIO_H_
 #define SRC_GPIO_H_
+#include"stdbool.h"
 
 //After reviewing https://www.silabs.com/documents/public/user-guides/ug279-brd4104a-user-guide.pdf
 #define LED_port   (gpioPortF)
@@ -35,6 +36,8 @@
 #define LED0_pin   (4) //UIF_LED0
 #define LED1_pin   (5) //UIF_LED1
 #define TEMP_SENSOR_ENABLE_PIN (15)
+#define DISP_EXTCOMIN (13)
+
 
 
 // Function prototypes
@@ -44,8 +47,16 @@ void gpioLed0SetOff();
 void gpioLed1SetOn();
 void gpioLed1SetOff();
 
+/*
+turns on the gpio enable assosicated with Si7021
+*/
+void enable_display();
+/*
+turns off the gpio enable assosicated with Si7021
+*/
+void disable_display();
 
 
-
+void gpioSetDisplayExtcomin(bool value);
 
 #endif /* SRC_GPIO_H_ */

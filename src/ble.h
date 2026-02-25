@@ -12,6 +12,7 @@
 #include "app_assert.h"
 #include "sl_bt_api.h"
 #include "gatt_db.h"
+#include"lcd.h"
 
 // taken from lecture slides
 #define UINT8_TO_BITSTREAM(p, n) \

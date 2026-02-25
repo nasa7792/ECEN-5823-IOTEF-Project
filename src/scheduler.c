@@ -111,7 +111,7 @@ void state_machine(sl_bt_msg_t *evt)
     if (signals & evtI2CTransferComplete)
     {
       sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
-      disable_Si7021();
+      //disable_Si7021();
       process_temperature_reading(); //
       NVIC_DisableIRQ(I2C0_IRQn);
       nextState = STATE0_WARMUP;

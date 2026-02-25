@@ -17,6 +17,10 @@ void handle_ble_event(sl_bt_msg_t *evt)
   sl_status_t sc;
   bd_addr address;
   uint8_t address_type;
+  const char server_str[] = "Server";
+  const char Assignment_str[] = "A6";
+  const char adv_msg[]="Advertising";
+  const char connected_msg[]="Connected";
 
   // Handle stack events
   switch (SL_BT_MSG_ID(evt->header))
@@ -27,13 +31,28 @@ void handle_ble_event(sl_bt_msg_t *evt)
   case sl_bt_evt_system_boot_id:
     // Get device address
     sc = sl_bt_system_get_identity_address(&address, &address_type);
+
     if (sc != SL_STATUS_OK)
     {
       LOG_ERROR("sl_bt_system_get_identity_address() returned != 0 status=0x%04x  \n \r", (unsigned int)sc);
     }
     app_assert_status(sc);
     ble_data.myAddress = address;
+    char addrStr[18];
+    snprintf(addrStr, sizeof(addrStr),
+             "%02X:%02X:%02X:%02X:%02X:%02X",
+             address.addr[5],
+             address.addr[4],
+             address.addr[3],
+             address.addr[2],
+             address.addr[1],
+             address.addr[0]);
 
+    displayInit();
+    displayPrintf(DISPLAY_ROW_NAME,server_str);
+    displayPrintf(DISPLAY_ROW_BTADDR,addrStr);
+    displayPrintf(DISPLAY_ROW_ASSIGNMENT,Assignment_str);
+    displayPrintf(DISPLAY_ROW_CONNECTION,adv_msg);
     // Create advertising set
     sc = sl_bt_advertiser_create_set(&ble_data.advertisingSetHandle);
     if (sc != SL_STATUS_OK)
@@ -81,7 +100,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
     {
       LOG_ERROR("sl_bt_advertiser_stop() returned != 0 status=0x%04x  \n \r", (unsigned int)sc);
     }
-
+    displayPrintf(DISPLAY_ROW_CONNECTION,connected_msg);
     sc = sl_bt_connection_set_parameters(
         ble_data.connectionHandle,
         60,      // min interval = 75ms (1.25ms units)
@@ -103,6 +122,9 @@ void handle_ble_event(sl_bt_msg_t *evt)
     uint32_t interval_ms = (evt->data.evt_connection_parameters.interval * 5) / 4;
     uint32_t timeout_ms = evt->data.evt_connection_parameters.timeout * 10;
 
+    (void)interval_ms;
+    (void)timeout_ms;
+
     //    LOG_INFO("Interval: %lu ms Latency: %lu Timeout: %lu ms",
     //             interval_ms,
     //             evt->data.evt_connection_parameters.latency,
@@ -112,6 +134,8 @@ void handle_ble_event(sl_bt_msg_t *evt)
 
   case sl_bt_evt_connection_closed_id:
     // on receiving close event mark connection open as false
+    displayPrintf(DISPLAY_ROW_CONNECTION,adv_msg);
+    displayPrintf(DISPLAY_ROW_TEMPVALUE," ");
     ble_data.connectionOpen = false;
     ble_data.connectionHandle = 0;
     // restart advertising !

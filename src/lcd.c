@@ -50,7 +50,7 @@
 
 /*
  * Student edit: Add your name and email address here:
- * @student    Awesome Student, Awesome.Student@Colorado.edu
+ * @student    Nalin Saxena, nasa7792@Colorado.edu
 */
 
 
@@ -67,12 +67,12 @@
 
 
 #include "lcd.h"
-
+#include "sl_bt_api.h"
 
 // Include logging specifically for this .c file
 #define INCLUDE_LOG_DEBUG 1
 #include "log.h"
-
+#define DISPLAY_TIMER_HANDLE 1
 
 
 
@@ -257,7 +257,7 @@ void displayInit()
     //           the time now for the LCD to function properly.
     //           Create that function in gpio.c/.h Then add that function call here.
     //
-    //gpioSensorEnSetOn(); // we need SENSOR_ENABLE=1 which is tied to DISP_ENABLE
+    enable_display(); // we need SENSOR_ENABLE=1 which is tied to DISP_ENABLE
     //                     // for the LCD, on all the time now
 
 
@@ -309,17 +309,18 @@ void displayInit()
 	  // the LCD and it needs to be bled off. So toggling the EXTCOMIN input is the method by
 	  // which this takes place.
 	  // We will get a sl_bt_evt_system_soft_timer_id event as a result of calling
-	  // sl_bt_system_set_soft_timer() i.e. starting the timer.
+
 
     // Edit #3
     // Students: Figure out what parameters to pass in to sl_bt_system_set_soft_timer() to
     //           set up a 1 second repeating soft timer and uncomment the following lines
 
-	  //sl_status_t          timer_response;
-	  //timer_response = sl_bt_system_set_soft_timer();
-	  //if (timer_response != SL_STATUS_OK) {
-	  //    LOG_...
-    // }
+	  sl_status_t          timer_response;
+	  timer_response = sl_bt_system_set_lazy_soft_timer(
+	        32768,500,DISPLAY_TIMER_HANDLE,0);
+	  if (timer_response != SL_STATUS_OK) {
+	      LOG_ERROR("bruh \n \r");
+     }
 
 
 
@@ -345,7 +346,7 @@ void displayUpdate()
 	//           the EXTCOMIN input to the LCD. Add that function to gpio.c./.h
 	//           Then uncomment the following line.
 	//
-	//gpioSetDisplayExtcomin(display->last_extcomin_state_high);
+	gpioSetDisplayExtcomin(display->last_extcomin_state_high);
 	
 } // displayUpdate()
 

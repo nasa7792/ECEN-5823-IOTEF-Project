@@ -18,6 +18,7 @@
 #include "em_i2c.h"
 #include "timer.h"
 #include "em_core_generic.h"
+#include "lcd.h"
 #include "sl_i2cspm_sensor_config.h"
 
 extern I2C_TransferReturn_TypeDef transferStatus; // make this global for IRQs in A4

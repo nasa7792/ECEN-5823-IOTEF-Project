@@ -84,6 +84,9 @@ void process_temperature_reading()
   int32_t temperature_mC = (int32_t)(temperature_c * 1000.0f);
   htm_temperature_flt = INT32_TO_FLOAT(temperature_mC, -3);
 
+  char temp_str[20];
+  snprintf(temp_str, sizeof(temp_str), "Temp=%.2fC", temperature_c);
+
   // insert the temperature measurement
   UINT32_TO_BITSTREAM(p, htm_temperature_flt);
 
@@ -121,6 +124,7 @@ void process_temperature_reading()
     }
     else
     {
+      displayPrintf(DISPLAY_ROW_TEMPVALUE,temp_str);
       ble->is_Indication_Inflight = true;
     }
   }
