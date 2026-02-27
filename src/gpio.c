@@ -29,9 +29,7 @@
 #include <stdbool.h>
 #include "em_gpio.h"
 #include <string.h>
-
 #include "gpio.h"
-
 
 // Student Edit: Define these, 0's are placeholder values.
 //
@@ -96,6 +94,7 @@ void disable_display()
 }
 
 void gpioSetDisplayExtcomin(bool value){
+//toggle value of EXTCOMIN pin
   if(!value){
       GPIO_PinOutClear(TEMP_SENSOR_PORT,DISP_EXTCOMIN);
   }

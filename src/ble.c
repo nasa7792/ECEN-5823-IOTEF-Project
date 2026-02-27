@@ -47,7 +47,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
              address.addr[2],
              address.addr[1],
              address.addr[0]);
-
+    //add relevant calls to display, text server, assignment name, ble address
     displayInit();
     displayPrintf(DISPLAY_ROW_NAME,server_str);
     displayPrintf(DISPLAY_ROW_BTADDR,addrStr);
@@ -100,6 +100,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
     {
       LOG_ERROR("sl_bt_advertiser_stop() returned != 0 status=0x%04x  \n \r", (unsigned int)sc);
     }
+    //add relevant calls to display, connected message
     displayPrintf(DISPLAY_ROW_CONNECTION,connected_msg);
     sc = sl_bt_connection_set_parameters(
         ble_data.connectionHandle,
@@ -134,10 +135,12 @@ void handle_ble_event(sl_bt_msg_t *evt)
 
   case sl_bt_evt_connection_closed_id:
     // on receiving close event mark connection open as false
+    //add relevant calls to display, temperature value
     displayPrintf(DISPLAY_ROW_CONNECTION,adv_msg);
     displayPrintf(DISPLAY_ROW_TEMPVALUE," ");
     ble_data.connectionOpen = false;
     ble_data.connectionHandle = 0;
+    ble_data.htmIndicationsEnabled=false; //this was a bug :) in previous assignemnt
     // restart advertising !
     sc = sl_bt_advertiser_start(
         ble_data.advertisingSetHandle,
@@ -184,6 +187,10 @@ void handle_ble_event(sl_bt_msg_t *evt)
   case sl_bt_evt_gatt_server_indication_timeout_id:
     ble_data.is_Indication_Inflight = false;
     break;
+  case sl_bt_evt_system_soft_timer_id: //generated on soft timer elapsing
+    //on soft timer elapsing call lcd update function to prevent damage to lcd screen.
+    displayUpdate();
+      break;
   default:
     break;
   }

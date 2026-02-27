@@ -12,9 +12,7 @@
  */
 
 #include "scheduler.h"
-#define INCLUDE_LOG_DEBUG 1
 #include "timer.h"
-#include "log.h"
 
 void scheduler_setEvent_UnderFlow()
 {
@@ -71,8 +69,10 @@ void state_machine(sl_bt_msg_t *evt)
     if (signals & evtLETIMER0_UnderFlow)
     {
       // if no connection open then just return
-      if (getBleDataPtr()->connectionOpen == false || getBleDataPtr()->htmIndicationsEnabled==false)
-        return;
+      if (getBleDataPtr()->connectionOpen == false || getBleDataPtr()->htmIndicationsEnabled==false){
+          return;
+      }
+
       enable_Si7021();
       timerWaitUs_irq(LOAD_PWR_MGMT_SENSOR);
       nextState = STATE1_I2C_WRITE;

@@ -72,7 +72,7 @@
 // Include logging specifically for this .c file
 #define INCLUDE_LOG_DEBUG 1
 #include "log.h"
-#define DISPLAY_TIMER_HANDLE 1
+
 
 
 
@@ -317,9 +317,9 @@ void displayInit()
 
 	  sl_status_t          timer_response;
 	  timer_response = sl_bt_system_set_lazy_soft_timer(
-	        32768,500,DISPLAY_TIMER_HANDLE,0);
+	      SOFT_TIMER_PERIOD,SOFT_TIMER_SLACK,DISPLAY_TIMER_HANDLE,SOFT_TIMER_REPEATED);
 	  if (timer_response != SL_STATUS_OK) {
-	      LOG_ERROR("bruh \n \r");
+	      LOG_ERROR("sl_bt_system_set_lazy_soft_timer failed \n \r");
      }
 
 

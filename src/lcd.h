@@ -36,7 +36,10 @@
 
 #ifndef SRC_LCD_H_
 #define SRC_LCD_H_
-
+#define SOFT_TIMER_PERIOD (32768) //for a period of one second
+#define SOFT_TIMER_SLACK (500) //allowed slack
+#define SOFT_TIMER_REPEATED (0) //run in repeated mode
+#define DISPLAY_TIMER_HANDLE (0)
 
 
 /**
