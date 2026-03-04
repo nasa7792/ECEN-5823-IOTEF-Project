@@ -73,8 +73,6 @@
 #include "src/log.h"
 
 
-
-
 // *************************************************
 // Power Manager
 // *************************************************
@@ -171,8 +169,12 @@ SL_WEAK void app_init(void)
   sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM2);
 #endif
   gpioInit();
+
+//we dont really need the i2c and timer in client board
+#if DEVICE_IS_BLE_SERVER
   letimer0_init();
   initialize_I2C0();
+#endif
 } // app_init()
 
 
@@ -214,6 +216,10 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 
   // Just a trick to hide a compiler warning about unused input parameter evt.
   (void) evt;
-   handle_ble_event(evt); // put this code in ble.c/.h
-   state_machine(evt);    // put this code in scheduler.c/.h
+   handle_ble_event(evt); //common to both client and server
+#if DEVICE_IS_BLE_SERVER
+   temperature_state_machine(evt);    //server state machine
+#else
+   discovery_state_machine(evt);  //new! client state machine
+#endif
 } // sl_bt_on_event()

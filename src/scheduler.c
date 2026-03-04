@@ -5,7 +5,7 @@
  *      Author: Nalin Saxena
  *
  *  Edited on - 2/18/2026
- * 
+ *
  *
  * File Brief -implementation file for scheduler related apis. Contains function defs related
  * to scheduler events
@@ -13,6 +13,8 @@
 
 #include "scheduler.h"
 #include "timer.h"
+#define INCLUDE_LOG_DEBUG 1
+#include "log.h"
 
 void scheduler_setEvent_UnderFlow()
 {
@@ -41,7 +43,9 @@ void scheduler_setEvent_I2C_Transfer_Complete()
   CORE_EXIT_CRITICAL(); // exit critical, re-enable interrupts in NVIC
 }
 
-// our possible states
+#if DEVICE_IS_BLE_SERVER
+
+// our possible states for master
 typedef enum uint32_t
 {
   STATE0_WARMUP,
@@ -49,12 +53,12 @@ typedef enum uint32_t
   STATE2_INITIATE_CONVERSION,
   STATE3_I2C_READ_TEMP,
   STATE4_POWER_DOWN
-} State_t;
+} State_temp_t;
 
-void state_machine(sl_bt_msg_t *evt)
+void temperature_state_machine(sl_bt_msg_t *evt)
 {
-  static State_t nextState = STATE0_WARMUP;
-  State_t currentState = nextState;
+  static State_temp_t nextState = STATE0_WARMUP;
+  State_temp_t currentState = nextState;
 
   // we only react to external signals now getnextevent is dead
   if (SL_BT_MSG_ID(evt->header) != sl_bt_evt_system_external_signal_id)
@@ -69,8 +73,9 @@ void state_machine(sl_bt_msg_t *evt)
     if (signals & evtLETIMER0_UnderFlow)
     {
       // if no connection open then just return
-      if (getBleDataPtr()->connectionOpen == false || getBleDataPtr()->htmIndicationsEnabled==false){
-          return;
+      if (getBleDataPtr()->connectionOpen == false || getBleDataPtr()->htmIndicationsEnabled == false)
+      {
+        return;
       }
 
       enable_Si7021();
@@ -111,7 +116,7 @@ void state_machine(sl_bt_msg_t *evt)
     if (signals & evtI2CTransferComplete)
     {
       sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
-      //disable_Si7021();
+      // disable_Si7021();
       process_temperature_reading(); //
       NVIC_DisableIRQ(I2C0_IRQn);
       nextState = STATE0_WARMUP;
@@ -121,3 +126,76 @@ void state_machine(sl_bt_msg_t *evt)
     break;
   } // switch
 } // state_machine()
+
+// our possible states for client
+#else
+typedef enum uint32_t
+{
+  STATE0_IDLE,
+  STATE1_DISCOVER_SERVICES,
+  STATE2_DISCOVER_CHARACTERISTICS,
+  STATE3_ENABLE_INDICATIONS,
+} State_disovery_t;
+
+void discovery_state_machine(sl_bt_msg_t *evt)
+{
+  static State_disovery_t nextState = STATE0_IDLE;
+  State_disovery_t currentState = nextState;
+  sl_status_t sc;
+  ble_data_struct_t *ble_data = getBleDataPtr();
+  const uint8_t thermoService[2] = {0x09, 0x18};
+  const uint8_t thermo_char_uuid[2] = {0x1C, 0x2A};
+
+  switch (SL_BT_MSG_ID(evt->header))
+  {
+  case sl_bt_evt_connection_opened_id:
+    sc = sl_bt_gatt_discover_primary_services_by_uuid(
+        ble_data->connectionHandle,
+        sizeof(thermoService),
+        thermoService);
+    if (sc != SL_STATUS_OK)
+    {
+      LOG_ERROR("sl_bt_gatt_discover_primary_services_by_uuid() returned != 0 status=0x%04x\n\r", (unsigned int)sc);
+    }
+    nextState = STATE1_DISCOVER_SERVICES;
+    break;
+  case sl_bt_evt_gatt_procedure_completed_id:
+    if (currentState == STATE1_DISCOVER_SERVICES)
+    {
+      sc = sl_bt_gatt_discover_characteristics_by_uuid(
+          ble_data->connectionHandle,
+          ble_data->serviceHandle,
+          sizeof(thermo_char_uuid),
+          thermo_char_uuid);
+      if (sc != SL_STATUS_OK)
+      {
+        LOG_ERROR("sl_bt_gatt_discover_characteristics_by_uuid() returned != 0 status=0x%04x\n\r", (unsigned int)sc);
+      }
+      nextState = STATE2_DISCOVER_CHARACTERISTICS;
+    }
+
+    else if(currentState==STATE2_DISCOVER_CHARACTERISTICS){
+        sc = sl_bt_gatt_set_characteristic_notification(
+            ble_data->connectionHandle,
+            ble_data->characteristicHandle,
+            sl_bt_gatt_indication);
+        if (sc != SL_STATUS_OK)
+        {
+          LOG_ERROR("sl_bt_gatt_set_characteristic_notification() returned != 0 status=0x%04x\n\r", (unsigned int)sc);
+        }
+        nextState=STATE3_ENABLE_INDICATIONS;
+    }
+
+    else if(currentState==STATE3_ENABLE_INDICATIONS){
+        ble_data->htmIndicationsEnabled = true;
+        displayPrintf(DISPLAY_ROW_CONNECTION, "Handling Indications");
+        nextState = STATE0_IDLE; //just wait and go to idle
+    }
+    break;
+
+  case sl_bt_evt_connection_closed_id:
+    nextState = STATE0_IDLE; //just wait and go to idle
+    break;
+  }
+}
+#endif

@@ -12,6 +12,7 @@
 #include "app_assert.h"
 #include "sl_bt_api.h"
 #include "gatt_db.h"
+#include "ble_device_type.h"
 #include"lcd.h"
 
 // taken from lecture slides
@@ -30,6 +31,9 @@
     }
 #define INT32_TO_FLOAT(m, e) ((int32_t)(((uint32_t)m) & 0x00FFFFFFU) | (((uint32_t)e) << 24))
 
+int32_t FLOAT_TO_INT32(const uint8_t *buffer_ptr);
+
+
 // BLE Data Structure, save all of our private BT data in here.
 // Modern C (circa 2021 does it this way)
 // typedef ble_data_struct_t is referred to as an anonymous struct definition
@@ -41,6 +45,8 @@ typedef struct
     // values unique for server
     // The advertising set handle allocated from Bluetooth stack.
     uint8_t advertisingSetHandle;
+    uint32_t  serviceHandle;
+    uint16_t characteristicHandle;
     uint8_t connectionHandle;
     bool htmIndicationsEnabled;  // a bool flag for indications enabled
     bool is_Indication_Inflight; // a bool flag for indications in flight

@@ -52,5 +52,9 @@ void scheduler_setEvent_I2C_Transfer_Complete();
 a modified version of the state machine from a4, 
 the state machine is now driven by ble events
 */
-void state_machine (sl_bt_msg_t *evt);
+void temperature_state_machine (sl_bt_msg_t *evt);
+
+
+void discovery_state_machine(sl_bt_msg_t *evt);
 #endif /* SRC_SCHEDULER_H_ */
+
