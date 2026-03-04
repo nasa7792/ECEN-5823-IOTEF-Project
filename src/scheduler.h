@@ -54,7 +54,9 @@ the state machine is now driven by ble events
 */
 void temperature_state_machine (sl_bt_msg_t *evt);
 
-
+/*
+a new! state machine for the client board, which handles discovery states
+*/
 void discovery_state_machine(sl_bt_msg_t *evt);
 #endif /* SRC_SCHEDULER_H_ */
 

@@ -170,7 +170,7 @@ SL_WEAK void app_init(void)
 #endif
   gpioInit();
 
-//we dont really need the i2c and timer in client board
+//we dont really need the i2c and timer in client board, so we will remove those calls
 #if DEVICE_IS_BLE_SERVER
   letimer0_init();
   initialize_I2C0();

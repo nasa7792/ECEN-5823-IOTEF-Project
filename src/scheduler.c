@@ -4,11 +4,13 @@
  *  Created on: Feb 4, 2026
  *      Author: Nalin Saxena
  *
- *  Edited on - 2/18/2026
+ *  Edited on - 3/4/2026
  *
  *
  * File Brief -implementation file for scheduler related apis. Contains function defs related
  * to scheduler events
+ *
+ * Edited version contains, code for the client side and server side state machine
  */
 
 #include "scheduler.h"
@@ -42,6 +44,8 @@ void scheduler_setEvent_I2C_Transfer_Complete()
   sl_bt_external_signal(evtI2CTransferComplete);
   CORE_EXIT_CRITICAL(); // exit critical, re-enable interrupts in NVIC
 }
+
+// if we are building code for the server
 
 #if DEVICE_IS_BLE_SERVER
 
@@ -143,23 +147,27 @@ void discovery_state_machine(sl_bt_msg_t *evt)
   State_disovery_t currentState = nextState;
   sl_status_t sc;
   ble_data_struct_t *ble_data = getBleDataPtr();
-  const uint8_t thermoService[2] = {0x09, 0x18};
+  const uint8_t thermoService[2] = {0x09, 0x18}; // as per lecture slides
   const uint8_t thermo_char_uuid[2] = {0x1C, 0x2A};
 
   switch (SL_BT_MSG_ID(evt->header))
   {
   case sl_bt_evt_connection_opened_id:
+    // we need to scan for our temperature service by uuid
     sc = sl_bt_gatt_discover_primary_services_by_uuid(
-        ble_data->connectionHandle,
+        ble_data->connectionHandle, // already set by the handle_ble_event
         sizeof(thermoService),
         thermoService);
     if (sc != SL_STATUS_OK)
     {
       LOG_ERROR("sl_bt_gatt_discover_primary_services_by_uuid() returned != 0 status=0x%04x\n\r", (unsigned int)sc);
     }
-    nextState = STATE1_DISCOVER_SERVICES;
+    else
+    {
+      nextState = STATE1_DISCOVER_SERVICES; // if no error move to next state
+    }
     break;
-  case sl_bt_evt_gatt_procedure_completed_id:
+  case sl_bt_evt_gatt_procedure_completed_id: // this is a common event for multiple state changes
     if (currentState == STATE1_DISCOVER_SERVICES)
     {
       sc = sl_bt_gatt_discover_characteristics_by_uuid(
@@ -171,30 +179,39 @@ void discovery_state_machine(sl_bt_msg_t *evt)
       {
         LOG_ERROR("sl_bt_gatt_discover_characteristics_by_uuid() returned != 0 status=0x%04x\n\r", (unsigned int)sc);
       }
-      nextState = STATE2_DISCOVER_CHARACTERISTICS;
+
+      else
+      {
+        nextState = STATE2_DISCOVER_CHARACTERISTICS;
+      }
     }
 
-    else if(currentState==STATE2_DISCOVER_CHARACTERISTICS){
-        sc = sl_bt_gatt_set_characteristic_notification(
-            ble_data->connectionHandle,
-            ble_data->characteristicHandle,
-            sl_bt_gatt_indication);
-        if (sc != SL_STATUS_OK)
-        {
-          LOG_ERROR("sl_bt_gatt_set_characteristic_notification() returned != 0 status=0x%04x\n\r", (unsigned int)sc);
-        }
-        nextState=STATE3_ENABLE_INDICATIONS;
+    else if (currentState == STATE2_DISCOVER_CHARACTERISTICS)
+    {
+      sc = sl_bt_gatt_set_characteristic_notification(
+          ble_data->connectionHandle,
+          ble_data->characteristicHandle,
+          sl_bt_gatt_indication);
+      if (sc != SL_STATUS_OK)
+      {
+        LOG_ERROR("sl_bt_gatt_set_characteristic_notification() returned != 0 status=0x%04x\n\r", (unsigned int)sc);
+      }
+      else
+      {
+        nextState = STATE3_ENABLE_INDICATIONS;
+      }
     }
 
-    else if(currentState==STATE3_ENABLE_INDICATIONS){
-        ble_data->htmIndicationsEnabled = true;
-        displayPrintf(DISPLAY_ROW_CONNECTION, "Handling Indications");
-        nextState = STATE0_IDLE; //just wait and go to idle
+    else if (currentState == STATE3_ENABLE_INDICATIONS)
+    {
+      ble_data->htmIndicationsEnabled = true; // we now enable indications
+      displayPrintf(DISPLAY_ROW_CONNECTION, "Handling Indications");
+      nextState = STATE0_IDLE; // just wait and go to idle
     }
     break;
 
   case sl_bt_evt_connection_closed_id:
-    nextState = STATE0_IDLE; //just wait and go to idle
+    nextState = STATE0_IDLE; // just wait and go to idle
     break;
   }
 }

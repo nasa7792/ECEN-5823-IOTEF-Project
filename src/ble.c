@@ -33,6 +33,7 @@ float conversion_func(const uint8_t *buffer_ptr)
 
 void handle_ble_event(sl_bt_msg_t *evt)
 {
+  //common variable and constants
   sl_status_t sc;
   bd_addr address;
   uint8_t address_type;
@@ -292,11 +293,10 @@ void handle_ble_event(sl_bt_msg_t *evt)
     ble_data.is_Indication_Inflight = false;
     break;
 
+//lcd refresh is common to both client and server
   case sl_bt_evt_system_soft_timer_id: // generated on soft timer elapsing
     // on soft timer elapsing call lcd update function to prevent damage to lcd screen.
     displayUpdate();
-    break;
-  default:
     break;
 
 // client only events
