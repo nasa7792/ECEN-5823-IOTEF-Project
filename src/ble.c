@@ -9,38 +9,55 @@
 #define INCLUDE_LOG_DEBUG 1
 #include "log.h"
 #include "ble.h"
-#include"math.h"
+#include "math.h"
 
 ble_data_struct_t ble_data;
 
-float conversion_func(const uint8_t *buffer_ptr)
+float temperature_conv(const uint8_t *buffer_ptr)
 {
   uint8_t signByte = 0;
   int32_t mantissa;
+  // input data format is:
+  // [0] = flags byte, bit[0] = 0 -> Celsius; =1 -> Fahrenheit
+  // [3][2][1] = mantissa (2's complement)
+  // [4] = exponent (2's complement)
+  // BT buffer_ptr[0] has the flags byte
   int8_t exponent = (int8_t)buffer_ptr[4];
-
-  if (buffer_ptr[3] & 0x80) {
-      signByte = 0xFF;
+  // sign extend the mantissa value if the mantissa is negative
+  if (buffer_ptr[3] & 0x80)
+  { // msb of [3] is the sign of the mantissa
+    signByte = 0xFF;
   }
-
-  mantissa =  (int32_t)buffer_ptr[1]
-            | ((int32_t)buffer_ptr[2] << 8)
-            | ((int32_t)buffer_ptr[3] << 16)
-            | ((int32_t)signByte      << 24);
-
-  return (float)mantissa * powf(10.0f, (float)exponent);
-} // FLOAT_TO_INT3
+  mantissa = (int32_t)(buffer_ptr[1] << 0) |
+             (int32_t)(buffer_ptr[2] << 8) |
+             (int32_t)(buffer_ptr[3] << 16) |
+             (int32_t)(signByte << 24);
+  // value = 10^exponent * mantissa, pow() returns a double type
+  return powf(10.0f, (float)exponent) * (float)mantissa;
+} // FLOAT_TO_INT32
 
 void handle_ble_event(sl_bt_msg_t *evt)
 {
-  //common variable and constants
+  // common variable and constants
   sl_status_t sc;
   bd_addr address;
   uint8_t address_type;
-  const char Assignment_str[] = "A7";
+  const char Assignment_str[] = "A7"; //as per assignment
   const char adv_msg[] = "Advertising";
   const char scan_msg[] = "Discovering";
   const char connected_msg[] = "Connected";
+  //server address
+  uint8_t server_addr[6] = SERVER_BT_ADDRESS;
+  char server_str[18];
+  // format the server address
+  snprintf(server_str, sizeof(server_str),
+           "%02X:%02X:%02X:%02X:%02X:%02X",
+           server_addr[5],
+           server_addr[4],
+           server_addr[3],
+           server_addr[2],
+           server_addr[1],
+           server_addr[0]);
 
   // Handle stack events
   switch (SL_BT_MSG_ID(evt->header))
@@ -141,7 +158,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
       LOG_ERROR("sl_bt_scanner_set_timing() returned != 0 status=0x%04x  \n \r", (unsigned int)sc);
     }
 
-    // set default params
+    // set scanning paramaters for master
     sc = sl_bt_connection_set_default_parameters(
         60, // 75ms
         60, // 75ms
@@ -174,6 +191,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
     ble_data.connectionOpen = true;
     ble_data.connectionHandle = evt->data.evt_connection_opened.connection;
     // add relevant calls to display, connected message
+    displayPrintf(DISPLAY_ROW_BTADDR2, server_str);
     displayPrintf(DISPLAY_ROW_CONNECTION, connected_msg);
 
     // if we are server then we
@@ -293,7 +311,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
     ble_data.is_Indication_Inflight = false;
     break;
 
-//lcd refresh is common to both client and server
+    // lcd refresh is common to both client and server
   case sl_bt_evt_system_soft_timer_id: // generated on soft timer elapsing
     // on soft timer elapsing call lcd update function to prevent damage to lcd screen.
     displayUpdate();
@@ -309,7 +327,6 @@ void handle_ble_event(sl_bt_msg_t *evt)
     {
       break;
     }
-    uint8_t server_addr[6] = SERVER_BT_ADDRESS;
     // check if servers address is present
     if (memcmp(report->address.addr, server_addr, 6) != 0)
     {
@@ -351,10 +368,8 @@ void handle_ble_event(sl_bt_msg_t *evt)
       }
     }
     uint8_t *data = evt->data.evt_gatt_characteristic_value.value.data;
-    float temperature = conversion_func(data);
-    // Or adjust format string depending on flags
+    float temperature = temperature_conv(data);
     displayPrintf(DISPLAY_ROW_TEMPVALUE, "Temp=%.2f C", temperature);
-    LOG_INFO("temperature %.2f\n\r", temperature);
     break;
 #endif
   }

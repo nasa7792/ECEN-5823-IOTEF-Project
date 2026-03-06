@@ -31,7 +31,6 @@
     }
 #define INT32_TO_FLOAT(m, e) ((int32_t)(((uint32_t)m) & 0x00FFFFFFU) | (((uint32_t)e) << 24))
 
-int32_t FLOAT_TO_INT32(const uint8_t *buffer_ptr);
 
 
 // BLE Data Structure, save all of our private BT data in here.
