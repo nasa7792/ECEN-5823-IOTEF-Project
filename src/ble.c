@@ -348,11 +348,13 @@ void handle_ble_event(sl_bt_msg_t *evt)
   }
   break;
 
+    //set service handle
   case sl_bt_evt_gatt_service_id:
     // store service handle
     ble_data.serviceHandle = evt->data.evt_gatt_service.service;
     break;
 
+    //set characterstic handle
   case sl_bt_evt_gatt_characteristic_id:
     ble_data.characteristicHandle = evt->data.evt_gatt_characteristic.characteristic;
     break;
@@ -360,6 +362,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
   case sl_bt_evt_gatt_characteristic_value_id:
     if (evt->data.evt_gatt_characteristic_value.att_opcode == sl_bt_gatt_handle_value_indication)
     {
+       //client sends ack for indications
       sc = sl_bt_gatt_send_characteristic_confirmation(ble_data.connectionHandle);
       app_assert_status(sc);
       if (sc != SL_STATUS_OK)
