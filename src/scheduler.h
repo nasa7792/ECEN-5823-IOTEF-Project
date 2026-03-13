@@ -19,7 +19,9 @@ typedef enum
 {   //as per assignmnet documents we need to support 3 events
     evtLETIMER0_UnderFlow=(1U << 0), 
     evtLETIMER0_Comp1=(1U << 1),
-    evtI2CTransferComplete=(1U << 2)
+    evtI2CTransferComplete=(1U << 2),
+    evtBtnPressed=(1U<<3),
+    evtBtnReleased=(1U<<4)
 } event_list;
 
 
@@ -46,6 +48,12 @@ void scheduler_setEvent_COMP1();
 called from i2c event handler irq and sets the evtI2CTransferComplete event
 */
 void scheduler_setEvent_I2C_Transfer_Complete();
+
+/*
+called from LETimer0 irq and sets the evtLETIMER0_UnderFlow event
+*/
+void scheduler_setEvent_BtnPressed();
+void scheduler_setEvent_BtnReleased();
 
 
 /*

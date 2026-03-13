@@ -45,6 +45,28 @@ void scheduler_setEvent_I2C_Transfer_Complete()
   CORE_EXIT_CRITICAL(); // exit critical, re-enable interrupts in NVIC
 }
 
+
+
+void scheduler_setEvent_BtnPressed()
+{
+  CORE_DECLARE_IRQ_STATE;
+  // set event
+  CORE_ENTER_CRITICAL(); // enter critical, turn off interrupts in NVIC
+  sl_bt_external_signal(evtBtnPressed);
+  CORE_EXIT_CRITICAL(); // exit critical, re-enable interrupts in NVIC
+}
+
+
+void scheduler_setEvent_BtnReleased()
+{
+  CORE_DECLARE_IRQ_STATE;
+  // set event
+  CORE_ENTER_CRITICAL(); // enter critical, turn off interrupts in NVIC
+  sl_bt_external_signal(evtBtnReleased);
+  CORE_EXIT_CRITICAL(); // exit critical, re-enable interrupts in NVIC
+}
+
+
 // if we are building code for the server
 
 #if DEVICE_IS_BLE_SERVER

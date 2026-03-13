@@ -12,6 +12,23 @@
 #include "log.h"
 volatile uint32_t elapsed_ms = 0;
 
+
+void GPIO_EVEN_IRQHandler(void)
+{
+    // Get and clear the interrupt flags
+    uint32_t flags = GPIO_IntGet();
+    GPIO_IntClear(flags);
+
+    // Check if PB0 (pin 6) triggered the interrupt
+    if (flags & (1 << USR_BTN0)) {
+        if (GPIO_PinInGet(gpioPortF, USR_BTN0) == 0) {
+            scheduler_setEvent_BtnPressed();
+        } else {
+            scheduler_setEvent_BtnReleased();
+        }
+    }
+}
+
 void enable_LETIMER0_interrupt()
 {
   // Enable LETIMER interrupt in NVIC

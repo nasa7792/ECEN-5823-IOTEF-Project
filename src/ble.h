@@ -15,6 +15,8 @@
 #include "ble_device_type.h"
 #include"lcd.h"
 
+#define QUEUE_DEPTH      (16)
+
 // taken from lecture slides
 #define UINT8_TO_BITSTREAM(p, n) \
     {                            \
@@ -31,6 +33,17 @@
     }
 #define INT32_TO_FLOAT(m, e) ((int32_t)(((uint32_t)m) & 0x00FFFFFFU) | (((uint32_t)e) << 24))
 
+#define MAX_BUFFER_LENGTH  (5)
+#define MIN_BUFFER_LENGTH  (1)
+
+
+typedef struct {
+
+  uint32_t       bufLength;                  // Number of bytes written to field buffer[5]
+  uint16_t       charHandle;                 // GATT DB handle from gatt_db.h
+  uint8_t        buffer[1];                      //only need 1 byte for btn state
+
+} queue_struct_t;
 
 
 // BLE Data Structure, save all of our private BT data in here.
@@ -47,9 +60,12 @@ typedef struct
     uint32_t  serviceHandle;
     uint16_t characteristicHandle;
     uint8_t connectionHandle;
-    bool htmIndicationsEnabled;  // a bool flag for indications enabled
+    bool htmIndicationsEnabled;  // a bool flag for htm indications enabled
+    bool btnIndicationsEnabled;
     bool is_Indication_Inflight; // a bool flag for indications in flight
     bool connectionOpen;         // a bool flag to indicate of we have an active connection open
+    bool waitingForConfirmation; //are we waiting for btn press
+    bool bonded;
 
     // values unique for client
 } ble_data_struct_t;

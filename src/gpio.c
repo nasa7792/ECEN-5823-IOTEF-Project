@@ -56,7 +56,9 @@ void gpioInit()
 	GPIO_PinModeSet(LED_port, LED0_pin, gpioModePushPull, false);
 	GPIO_PinModeSet(LED_port, LED1_pin, gpioModePushPull, false);
   GPIO_PinModeSet(TEMP_SENSOR_PORT, LED1_pin, gpioModePushPull, false);
-
+  GPIO_PinModeSet(gpioPortF, USR_BTN0, gpioModeInputPull, true);
+  GPIO_ExtIntConfig(gpioPortF, USR_BTN0, USR_BTN0, true, true, true);
+  NVIC_EnableIRQ(GPIO_EVEN_IRQn); //enable isr for button
 } // gpioInit()
 
 

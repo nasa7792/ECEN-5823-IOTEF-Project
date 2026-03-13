@@ -35,6 +35,7 @@
 #define TEMP_SENSOR_PORT (gpioPortD)
 #define LED0_pin   (4) //UIF_LED0
 #define LED1_pin   (5) //UIF_LED1
+#define USR_BTN0   (6)//PF6
 #define TEMP_SENSOR_ENABLE_PIN (15)
 #define DISP_EXTCOMIN (13)
 
