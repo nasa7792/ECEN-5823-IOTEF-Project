@@ -420,6 +420,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
 #endif
     break;
 
+#if DEVICE_IS_BLE_SERVER
   case sl_bt_evt_gatt_server_characteristic_status_id:
   {
     uint16_t characteristic = evt->data.evt_gatt_server_characteristic_status.characteristic;
@@ -463,7 +464,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
   }
   break;
 
-#if DEVICE_IS_BLE_SERVER
+
     // first bonding event we auto accept
   case sl_bt_evt_sm_confirm_bonding_id:
     sc = sl_bt_sm_bonding_confirm(ble_data.connectionHandle, 1);
