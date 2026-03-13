@@ -47,7 +47,7 @@ void scheduler_setEvent_I2C_Transfer_Complete()
 
 
 
-void scheduler_setEvent_BtnPressed()
+void setEvent_BtnPressed()
 {
   CORE_DECLARE_IRQ_STATE;
   // set event
@@ -57,7 +57,7 @@ void scheduler_setEvent_BtnPressed()
 }
 
 
-void scheduler_setEvent_BtnReleased()
+void setEvent_BtnReleased()
 {
   CORE_DECLARE_IRQ_STATE;
   // set event

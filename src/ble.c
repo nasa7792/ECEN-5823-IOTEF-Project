@@ -13,7 +13,9 @@
 
 ble_data_struct_t ble_data;
 
-// start of circular queue related declarations and functions
+/*
+ * start of circular queue related declarations and functions
+ */
 queue_struct_t my_queue[QUEUE_DEPTH]; // the queue
 uint32_t wptr = 0;                    // write pointer
 uint32_t rptr = 0;                    // read pointer
@@ -105,6 +107,15 @@ bool dequeue(uint16_t *charHandle, uint32_t *bufLength, uint8_t *buffer)
 
 } // read_queue()
 
+/*
+ * end of circular queue related declarations and functions
+ */
+
+
+/*
+ * a helper function to deal with button indications
+ *
+ */
 void send_Indication_OrStore(uint32_t bufLength, uint8_t *buffer)
 {
   if (!ble_data.connectionOpen || !ble_data.btnIndicationsEnabled)
@@ -112,6 +123,7 @@ void send_Indication_OrStore(uint32_t bufLength, uint8_t *buffer)
     return;
   }
   sl_status_t sc;
+  //if we do not have any on inflight indications and nothing in our button queue we just send the indications
   if (!ble_data.is_Indication_Inflight && get_queue_depth() == 0)
   {
     sc = sl_bt_gatt_server_send_indication(
@@ -126,11 +138,13 @@ void send_Indication_OrStore(uint32_t bufLength, uint8_t *buffer)
     }
     else
     {
+      //if no error happened that means indications are in flight
       ble_data.is_Indication_Inflight = true;
     }
   }
   else
   {
+      //if we have an already inflight indication we store the current indication in queue
     enqueue(gattdb_button_state, bufLength, buffer);
   }
 }
@@ -164,7 +178,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
   sl_status_t sc;
   bd_addr address;
   uint8_t address_type;
-  const char Assignment_str[] = "A8"; // as per assignment
+  const char Assignment_str[] = "A8"; // as per assignment A8
   const char adv_msg[] = "Advertising";
   const char scan_msg[] = "Discovering";
   const char connected_msg[] = "Connected";
@@ -218,7 +232,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
     displayPrintf(DISPLAY_ROW_BTADDR, addrStr);              // display address of  Server
     displayPrintf(DISPLAY_ROW_ASSIGNMENT, Assignment_str);   // display A8
     displayPrintf(DISPLAY_ROW_CONNECTION, adv_msg);          // display Advertising
-    sl_bt_sm_configure(0x0F, sl_bt_sm_io_capability_displayyesno);
+    sl_bt_sm_configure(0x0F, sl_bt_sm_io_capability_displayyesno); //add security apis
 
     // Create advertising set
     sc = sl_bt_advertiser_create_set(&ble_data.advertisingSetHandle);
@@ -420,12 +434,15 @@ void handle_ble_event(sl_bt_msg_t *evt)
         if (ccf == sl_bt_gatt_server_indication)
         {
           ble_data.htmIndicationsEnabled = true;
+          gpioLed0SetOn(); //led 0 is on if htm indications are enabled
         }
         else
         {
           ble_data.htmIndicationsEnabled = false;
+          gpioLed0SetOff(); //led 0 is off if htm indications are disabled
         }
       }
+      //add another set for the button state
       if (characteristic == gattdb_button_state)
       {
         if (ccf == sl_bt_gatt_server_indication)
@@ -472,14 +489,14 @@ void handle_ble_event(sl_bt_msg_t *evt)
   {
     uint32_t signals = evt->data.evt_system_external_signal.extsignals;
     uint8_t btn_state;
-
+    //deal with external button pressed events
     if (signals & evtBtnPressed)
     {
       displayPrintf(DISPLAY_ROW_10, "Button Pressed");
       btn_state = 0x01;
+      gpioLed1SetOn(); //turn on user led 1
       if (ble_data.waitingForConfirmation == true)
       {
-
         sl_bt_sm_passkey_confirm(ble_data.connectionHandle, 1);
         ble_data.waitingForConfirmation = false;
       }
@@ -498,6 +515,8 @@ void handle_ble_event(sl_bt_msg_t *evt)
     if (signals & evtBtnReleased)
     {
       btn_state = 0x00;
+      //turn off user led 1
+      gpioLed1SetOff();
       displayPrintf(DISPLAY_ROW_10, "Button Released");
 
       // update local gatt server
@@ -516,6 +535,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
   case sl_bt_evt_sm_bonded_id:
     ble_data.bonded = true;
     displayPrintf(DISPLAY_ROW_CONNECTION, "Bonded");
+    //clear up the display rows
     displayPrintf(DISPLAY_ROW_PASSKEY, " ");
     displayPrintf(DISPLAY_ROW_ACTION, " ");
     break;

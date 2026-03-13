@@ -50,10 +50,15 @@ called from i2c event handler irq and sets the evtI2CTransferComplete event
 void scheduler_setEvent_I2C_Transfer_Complete();
 
 /*
-called from LETimer0 irq and sets the evtLETIMER0_UnderFlow event
+called from LETimer0 irq and sets the pb0 pressed event
 */
-void scheduler_setEvent_BtnPressed();
-void scheduler_setEvent_BtnReleased();
+void setEvent_BtnPressed();
+
+
+/*
+called from LETimer0 irq and sets the pb0 released event
+*/
+void setEvent_BtnReleased();
 
 
 /*

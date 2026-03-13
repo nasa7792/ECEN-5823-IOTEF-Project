@@ -10,21 +10,22 @@
 #include "irq.h"
 #define INCLUDE_LOG_DEBUG 1
 #include "log.h"
+#define BTN0_POS (1)
 volatile uint32_t elapsed_ms = 0;
+
 
 
 void GPIO_EVEN_IRQHandler(void)
 {
-    // Get and clear the interrupt flags
     uint32_t flags = GPIO_IntGet();
     GPIO_IntClear(flags);
 
     // Check if PB0 (pin 6) triggered the interrupt
-    if (flags & (1 << USR_BTN0)) {
+    if (flags & (BTN0_POS << USR_BTN0)) {
         if (GPIO_PinInGet(gpioPortF, USR_BTN0) == 0) {
-            scheduler_setEvent_BtnPressed();
+            setEvent_BtnPressed(); //
         } else {
-            scheduler_setEvent_BtnReleased();
+            setEvent_BtnReleased();
         }
     }
 }

@@ -36,7 +36,7 @@
 #define MAX_BUFFER_LENGTH  (5)
 #define MIN_BUFFER_LENGTH  (1)
 
-
+//taken from assignment from 0.5
 typedef struct {
 
   uint32_t       bufLength;                  // Number of bytes written to field buffer[5]
@@ -61,11 +61,11 @@ typedef struct
     uint16_t characteristicHandle;
     uint8_t connectionHandle;
     bool htmIndicationsEnabled;  // a bool flag for htm indications enabled
-    bool btnIndicationsEnabled;
+    bool btnIndicationsEnabled;  // a bool flag for button indications enabled
     bool is_Indication_Inflight; // a bool flag for indications in flight
     bool connectionOpen;         // a bool flag to indicate of we have an active connection open
-    bool waitingForConfirmation; //are we waiting for btn press
-    bool bonded;
+    bool waitingForConfirmation; //are we waiting for btn press?
+    bool bonded;  //a flag to maintain bonded status
 
     // values unique for client
 } ble_data_struct_t;
