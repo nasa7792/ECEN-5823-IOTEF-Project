@@ -59,7 +59,12 @@ void gpioInit()
   //added for A8 we need to enable the user button 0 with filter
   GPIO_PinModeSet(gpioPortF, USR_BTN0, gpioModeInputPullFilter, true);
   GPIO_ExtIntConfig(gpioPortF, USR_BTN0, USR_BTN0, true, true, true);
-  NVIC_EnableIRQ(GPIO_EVEN_IRQn); //enable isr for button
+
+  //for pb1 button
+  GPIO_PinModeSet(gpioPortF, USR_BTN1, gpioModeInputPullFilter, true);
+  GPIO_ExtIntConfig(gpioPortF, USR_BTN1, USR_BTN1, true, true, true);
+  NVIC_EnableIRQ(GPIO_EVEN_IRQn); //enable isr for pb0 button
+  NVIC_EnableIRQ(GPIO_ODD_IRQn); //enable isr for pb1 button
 } // gpioInit()
 
 

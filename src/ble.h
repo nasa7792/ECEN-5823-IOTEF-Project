@@ -57,15 +57,23 @@ typedef struct
     // values unique for server
     // The advertising set handle allocated from Bluetooth stack.
     uint8_t advertisingSetHandle;
-    uint32_t  serviceHandle;
-    uint16_t characteristicHandle;
+    uint32_t  serviceHandle_htm;
+    uint32_t  serviceHandle_btn;
+    uint16_t characteristicHandle_htm;
+    uint16_t characteristicHandle_btn;
     uint8_t connectionHandle;
+
+
+
     bool htmIndicationsEnabled;  // a bool flag for htm indications enabled
     bool btnIndicationsEnabled;  // a bool flag for button indications enabled
     bool is_Indication_Inflight; // a bool flag for indications in flight
     bool connectionOpen;         // a bool flag to indicate of we have an active connection open
     bool waitingForConfirmation; //are we waiting for btn press?
     bool bonded;  //a flag to maintain bonded status
+    bool isReadRequestInflight; //have we already requested a read ?
+    bool isPB0Held; //if pb0 is held and we press and release pb
+    bool wasPB1Pressed; //track if PB1was pressed
 
     // values unique for client
 } ble_data_struct_t;

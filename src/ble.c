@@ -111,7 +111,6 @@ bool dequeue(uint16_t *charHandle, uint32_t *bufLength, uint8_t *buffer)
  * end of circular queue related declarations and functions
  */
 
-
 /*
  * a helper function to deal with button indications
  *
@@ -123,7 +122,7 @@ void send_Indication_OrStore(uint32_t bufLength, uint8_t *buffer)
     return;
   }
   sl_status_t sc;
-  //if we do not have any on inflight indications and nothing in our button queue we just send the indications
+  // if we do not have any on inflight indications and nothing in our button queue we just send the indications
   if (!ble_data.is_Indication_Inflight && get_queue_depth() == 0)
   {
     sc = sl_bt_gatt_server_send_indication(
@@ -138,13 +137,13 @@ void send_Indication_OrStore(uint32_t bufLength, uint8_t *buffer)
     }
     else
     {
-      //if no error happened that means indications are in flight
+      // if no error happened that means indications are in flight
       ble_data.is_Indication_Inflight = true;
     }
   }
   else
   {
-      //if we have an already inflight indication we store the current indication in queue
+    // if we have an already inflight indication we store the current indication in queue
     enqueue(gattdb_button_state, bufLength, buffer);
   }
 }
@@ -178,7 +177,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
   sl_status_t sc;
   bd_addr address;
   uint8_t address_type;
-  const char Assignment_str[] = "A8"; // as per assignment A8
+  const char Assignment_str[] = "A9"; // as per assignment A8
   const char adv_msg[] = "Advertising";
   const char scan_msg[] = "Discovering";
   const char connected_msg[] = "Connected";
@@ -203,7 +202,8 @@ void handle_ble_event(sl_bt_msg_t *evt)
   // Do not call any stack command before receiving this boot event!
   case sl_bt_evt_system_boot_id:
 
-    sl_bt_sm_delete_bondings(); // delete all previous bondings
+    sl_bt_sm_delete_bondings();                                    // delete all previous bondings
+    sl_bt_sm_configure(0x0F, sl_bt_sm_io_capability_displayyesno); // add security apis
 
     // Get device address, below code is common to server and client
     sc = sl_bt_system_get_identity_address(&address, &address_type);
@@ -232,7 +232,6 @@ void handle_ble_event(sl_bt_msg_t *evt)
     displayPrintf(DISPLAY_ROW_BTADDR, addrStr);              // display address of  Server
     displayPrintf(DISPLAY_ROW_ASSIGNMENT, Assignment_str);   // display A8
     displayPrintf(DISPLAY_ROW_CONNECTION, adv_msg);          // display Advertising
-    sl_bt_sm_configure(0x0F, sl_bt_sm_io_capability_displayyesno); //add security apis
 
     // Create advertising set
     sc = sl_bt_advertiser_create_set(&ble_data.advertisingSetHandle);
@@ -389,10 +388,17 @@ void handle_ble_event(sl_bt_msg_t *evt)
     // add relevant calls to display, temperature value
 
     displayPrintf(DISPLAY_ROW_TEMPVALUE, " ");
+    //do a proper cleanup
     ble_data.connectionOpen = false;
     ble_data.connectionHandle = 0;
     ble_data.htmIndicationsEnabled = false; // this was a bug :) in previous assignemnt
     ble_data.btnIndicationsEnabled = false;
+    ble_data.wasPB1Pressed=false;
+    ble_data.isPB0Held=false;
+    ble_data.is_Indication_Inflight=false;
+    ble_data.isReadRequestInflight=false;
+    ble_data.waitingForConfirmation=false;
+    gpioLed1SetOff();
 
 #if DEVICE_IS_BLE_SERVER
     displayPrintf(DISPLAY_ROW_CONNECTION, adv_msg);
@@ -435,24 +441,27 @@ void handle_ble_event(sl_bt_msg_t *evt)
         if (ccf == sl_bt_gatt_server_indication)
         {
           ble_data.htmIndicationsEnabled = true;
-          gpioLed0SetOn(); //led 0 is on if htm indications are enabled
+          gpioLed0SetOn(); // led 0 is on if htm indications are enabled
         }
         else
         {
           ble_data.htmIndicationsEnabled = false;
-          gpioLed0SetOff(); //led 0 is off if htm indications are disabled
+          gpioLed0SetOff(); // led 0 is off if htm indications are disabled
         }
       }
-      //add another set for the button state
+      // add another set for the button state
       if (characteristic == gattdb_button_state)
       {
         if (ccf == sl_bt_gatt_server_indication)
         {
           ble_data.btnIndicationsEnabled = true;
+          // as per A9 we need to treat LED 1 as indicator for PB1 indications
+          gpioLed1SetOn();
         }
         else
         {
           ble_data.btnIndicationsEnabled = false;
+          gpioLed1SetOff();
         }
       }
     }
@@ -463,7 +472,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
     }
   }
   break;
-
+#endif
 
     // first bonding event we auto accept
   case sl_bt_evt_sm_confirm_bonding_id:
@@ -490,12 +499,12 @@ void handle_ble_event(sl_bt_msg_t *evt)
   {
     uint32_t signals = evt->data.evt_system_external_signal.extsignals;
     uint8_t btn_state;
-    //deal with external button pressed events
-    if (signals & evtBtnPressed)
+    // deal with external button pressed events
+#if DEVICE_IS_BLE_SERVER
+    if (signals & evtPB0Pressed)
     {
       displayPrintf(DISPLAY_ROW_10, "Button Pressed");
       btn_state = 0x01;
-      gpioLed1SetOn(); //turn on user led 1
       if (ble_data.waitingForConfirmation == true)
       {
         sl_bt_sm_passkey_confirm(ble_data.connectionHandle, 1);
@@ -513,11 +522,9 @@ void handle_ble_event(sl_bt_msg_t *evt)
         send_Indication_OrStore(1, &btn_state);
       }
     }
-    if (signals & evtBtnReleased)
+    if (signals & evtPB0Released)
     {
       btn_state = 0x00;
-      //turn off user led 1
-      gpioLed1SetOff();
       displayPrintf(DISPLAY_ROW_10, "Button Released");
 
       // update local gatt server
@@ -530,13 +537,84 @@ void handle_ble_event(sl_bt_msg_t *evt)
         send_Indication_OrStore(1, &btn_state);
       }
     }
+#else
+    if (signals & evtPB0Pressed)
+    {
+      ble_data.isPB0Held = true;
+      if (ble_data.waitingForConfirmation == true)
+      {
+        sl_bt_sm_passkey_confirm(ble_data.connectionHandle, 1);
+        ble_data.waitingForConfirmation = false;
+      }
+    }
+
+    if (signals & evtPB0Released)
+    {
+      // pb1 must have been pressed for toggling indications
+      if (ble_data.wasPB1Pressed)
+      {
+        sc = sl_bt_gatt_set_characteristic_notification(
+            ble_data.connectionHandle,
+            ble_data.characteristicHandle_btn,
+            ble_data.btnIndicationsEnabled ? sl_bt_gatt_disable : sl_bt_gatt_indication);
+        if (sc != SL_STATUS_OK)
+        {
+          LOG_ERROR("toggle btn indications failed=0x%04x\n\r", (unsigned int)sc);
+        }
+        else
+        {
+          ble_data.btnIndicationsEnabled = !ble_data.btnIndicationsEnabled;
+          // if indications are turned we can clear the display row 9
+          if (!ble_data.btnIndicationsEnabled)
+          {
+            displayPrintf(DISPLAY_ROW_9, " ");
+          }
+        }
+      }
+
+      ble_data.isPB0Held = false;
+      ble_data.wasPB1Pressed = false;
+    }
+
+    // handle pb1 presses, each pb1 press is a new read request
+    if (signals & evtPB1Pressed)
+    {
+      // we need to make sure that pb0 is not held
+      if (!ble_data.isPB0Held)
+      {
+        if (!ble_data.isReadRequestInflight && ble_data.connectionOpen)
+        {
+          sc = sl_bt_gatt_read_characteristic_value(
+              ble_data.connectionHandle,
+              ble_data.characteristicHandle_btn);
+          if (sc != SL_STATUS_OK)
+          {
+            LOG_ERROR("read btn characteristic failed=0x%04x\n\r", (unsigned int)sc);
+          }
+          else
+          {
+            ble_data.isReadRequestInflight = true;
+          }
+        }
+      }
+    }
+
+    if (signals & evtPB1Released)
+    {
+      if (ble_data.isPB0Held)
+      {
+        ble_data.wasPB1Pressed = true;
+      }
+    }
+#endif
+
     break;
   }
 
   case sl_bt_evt_sm_bonded_id:
     ble_data.bonded = true;
     displayPrintf(DISPLAY_ROW_CONNECTION, "Bonded");
-    //clear up the display rows
+    // clear up the display rows
     displayPrintf(DISPLAY_ROW_PASSKEY, " ");
     displayPrintf(DISPLAY_ROW_ACTION, " ");
     break;
@@ -545,7 +623,6 @@ void handle_ble_event(sl_bt_msg_t *evt)
     ble_data.bonded = false;
     LOG_ERROR("Bonding Failed! the reason is 0x%04x\n\r", (unsigned int)evt->data.evt_sm_bonding_failed.reason);
     break;
-#endif
 
   // on timeout mark indication inflight as false
   case sl_bt_evt_gatt_server_indication_timeout_id:
@@ -562,8 +639,8 @@ void handle_ble_event(sl_bt_msg_t *evt)
     if (get_queue_depth() != 0 && !ble_data.is_Indication_Inflight)
     {
       queue_struct_t entry;
-      bool dq_status=dequeue(&entry.charHandle,&entry.bufLength,entry.buffer);
-      if(dq_status)
+      bool dq_status = dequeue(&entry.charHandle, &entry.bufLength, entry.buffer);
+      if (dq_status)
       {
         sc = sl_bt_gatt_server_send_indication(
             ble_data.connectionHandle,
@@ -615,18 +692,44 @@ void handle_ble_event(sl_bt_msg_t *evt)
   }
   break;
 
-    // set service handle
+    // since we are dealing with multiple services now we nede to look for a per uuid basis
   case sl_bt_evt_gatt_service_id:
     // store service handle
-    ble_data.serviceHandle = evt->data.evt_gatt_service.service;
+    {
+      uint8_t *uuid = evt->data.evt_gatt_service.uuid.data;
+      uint8_t len = evt->data.evt_gatt_service.uuid.len;
+
+      if (len == 2 && uuid[0] == 0x09 && uuid[1] == 0x18)
+      {
+        // we found the htm service !
+        ble_data.serviceHandle_htm = evt->data.evt_gatt_service.service;
+      }
+      else
+      {
+        ble_data.serviceHandle_btn = evt->data.evt_gatt_service.service;
+      }
+    }
     break;
 
-    // set characterstic handle
+    // since we are dealing with multiple services now we nede to look for a per uuid basis
   case sl_bt_evt_gatt_characteristic_id:
-    ble_data.characteristicHandle = evt->data.evt_gatt_characteristic.characteristic;
-    break;
+  {
+    uint8_t *uuid = evt->data.evt_gatt_characteristic.uuid.data;
+    uint8_t len = evt->data.evt_gatt_characteristic.uuid.len;
+    if (len == 2 && uuid[0] == 0x1C && uuid[1] == 0x2A) // 0x2A1C htm characteristic
+    {
+      ble_data.characteristicHandle_htm = evt->data.evt_gatt_characteristic.characteristic;
+    }
+    else if (len == 16)
+    {
+      ble_data.characteristicHandle_btn = evt->data.evt_gatt_characteristic.characteristic;
+    }
+  }
+  break;
 
   case sl_bt_evt_gatt_characteristic_value_id:
+  {
+    uint16_t char_handle = evt->data.evt_gatt_characteristic_value.characteristic;
     if (evt->data.evt_gatt_characteristic_value.att_opcode == sl_bt_gatt_handle_value_indication)
     {
       // client sends ack for indications
@@ -638,9 +741,29 @@ void handle_ble_event(sl_bt_msg_t *evt)
       }
     }
     uint8_t *data = evt->data.evt_gatt_characteristic_value.value.data;
-    float temperature = temperature_conv(data);
-    displayPrintf(DISPLAY_ROW_TEMPVALUE, "Temp=%.2f C", temperature);
-    break;
+    if (char_handle == ble_data.characteristicHandle_htm)
+    {
+      float temperature = temperature_conv(data);
+      displayPrintf(DISPLAY_ROW_TEMPVALUE, "Temp=%.2f C", temperature);
+    }
+    if (char_handle == ble_data.characteristicHandle_btn)
+    {
+      displayPrintf(DISPLAY_ROW_9, data[0] == 1 ? "Button Pressed" : "Button Released");
+    }
+  }
+  break;
+
+  case sl_bt_evt_gatt_procedure_completed_id:
+  {
+    sl_status_t result = evt->data.evt_gatt_procedure_completed.result;
+    if (result == SL_STATUS_BT_ATT_INSUFFICIENT_ENCRYPTION)
+    {
+      LOG_ERROR("Initiate bonding process \n\r");
+      sl_bt_sm_increase_security(ble_data.connectionHandle);
+      ble_data.isReadRequestInflight = false;
+    }
+  }
+  break;
 #endif
   }
 }

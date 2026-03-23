@@ -20,8 +20,10 @@ typedef enum
     evtLETIMER0_UnderFlow=(1U << 0), 
     evtLETIMER0_Comp1=(1U << 1),
     evtI2CTransferComplete=(1U << 2),
-    evtBtnPressed=(1U<<3),
-    evtBtnReleased=(1U<<4)
+    evtPB0Pressed=(1U<<3),
+    evtPB0Released=(1U<<4),
+    evtPB1Pressed=(1U<<5),
+    evtPB1Released=(1U<<6),
 } event_list;
 
 
@@ -52,13 +54,25 @@ void scheduler_setEvent_I2C_Transfer_Complete();
 /*
 called from LETimer0 irq and sets the pb0 pressed event
 */
-void setEvent_BtnPressed();
+void setEvent_PB0_Pressed();
 
 
 /*
 called from LETimer0 irq and sets the pb0 released event
 */
-void setEvent_BtnReleased();
+void setEvent_PB0_Released();
+
+
+/*
+ sets the pb1 pressed event
+*/
+void setEvent_PB1_Pressed();
+
+
+/*
+sets the pb1 released event
+*/
+void setEvent_PB1_Released();
 
 
 /*

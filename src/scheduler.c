@@ -45,29 +45,41 @@ void scheduler_setEvent_I2C_Transfer_Complete()
   CORE_EXIT_CRITICAL(); // exit critical, re-enable interrupts in NVIC
 }
 
-
-
-void setEvent_BtnPressed()
+void setEvent_PB0_Pressed()
 {
   CORE_DECLARE_IRQ_STATE;
   // set event
   CORE_ENTER_CRITICAL(); // enter critical, turn off interrupts in NVIC
-  sl_bt_external_signal(evtBtnPressed);
+  sl_bt_external_signal(evtPB0Pressed);
   CORE_EXIT_CRITICAL(); // exit critical, re-enable interrupts in NVIC
 }
 
-
-void setEvent_BtnReleased()
+void setEvent_PB0_Released()
 {
   CORE_DECLARE_IRQ_STATE;
   // set event
   CORE_ENTER_CRITICAL(); // enter critical, turn off interrupts in NVIC
-  sl_bt_external_signal(evtBtnReleased);
+  sl_bt_external_signal(evtPB0Released);
   CORE_EXIT_CRITICAL(); // exit critical, re-enable interrupts in NVIC
 }
 
+void setEvent_PB1_Pressed()
+{
+  CORE_DECLARE_IRQ_STATE;
+  // set event
+  CORE_ENTER_CRITICAL(); // enter critical, turn off interrupts in NVIC
+  sl_bt_external_signal(evtPB1Pressed);
+  CORE_EXIT_CRITICAL(); // exit critical, re-enable interrupts in NVIC
+}
 
-// if we are building code for the server
+void setEvent_PB1_Released()
+{
+  CORE_DECLARE_IRQ_STATE;
+  // set event
+  CORE_ENTER_CRITICAL(); // enter critical, turn off interrupts in NVIC
+  sl_bt_external_signal(evtPB1Released);
+  CORE_EXIT_CRITICAL(); // exit critical, re-enable interrupts in NVIC
+} // if we are building code for the server
 
 #if DEVICE_IS_BLE_SERVER
 
@@ -158,9 +170,11 @@ void temperature_state_machine(sl_bt_msg_t *evt)
 typedef enum uint32_t
 {
   STATE0_IDLE,
-  STATE1_DISCOVER_SERVICES,
-  STATE2_DISCOVER_CHARACTERISTICS,
-  STATE3_ENABLE_INDICATIONS,
+  STATE1_DISCOVER_HTM_SERVICE,
+  STATE2_DISCOVER_HTM_CHARACTERISTICS,
+  STATE3_ENABLE_HTM_INDICATIONS,
+  STATE4_DISCOVER_BTN_SERVICE,
+  STATE5_DISCOVER_BTN_CHARACTERISTICS,
 } State_disovery_t;
 
 void discovery_state_machine(sl_bt_msg_t *evt)
@@ -169,8 +183,17 @@ void discovery_state_machine(sl_bt_msg_t *evt)
   State_disovery_t currentState = nextState;
   sl_status_t sc;
   ble_data_struct_t *ble_data = getBleDataPtr();
+  // services and characteristic uuids
   const uint8_t thermoService[2] = {0x09, 0x18}; // as per lecture slides
   const uint8_t thermo_char_uuid[2] = {0x1C, 0x2A};
+
+  const uint8_t btn_service_uuid[16] = {
+      0x89, 0x62, 0x13, 0x2d, 0x2a, 0x65, 0xec, 0x87,
+      0x3e, 0x43, 0xc8, 0x38, 0x01, 0x00, 0x00, 0x00};
+
+  const uint8_t btn_char_uuid[16] = {
+      0x89, 0x62, 0x13, 0x2d, 0x2a, 0x65, 0xec, 0x87,
+      0x3e, 0x43, 0xc8, 0x38, 0x02, 0x00, 0x00, 0x00};
 
   switch (SL_BT_MSG_ID(evt->header))
   {
@@ -186,15 +209,15 @@ void discovery_state_machine(sl_bt_msg_t *evt)
     }
     else
     {
-      nextState = STATE1_DISCOVER_SERVICES; // if no error move to next state
+      nextState = STATE1_DISCOVER_HTM_SERVICE; // if no error move to next state
     }
     break;
   case sl_bt_evt_gatt_procedure_completed_id: // this is a common event for multiple state changes
-    if (currentState == STATE1_DISCOVER_SERVICES)
+    if (currentState == STATE1_DISCOVER_HTM_SERVICE)
     {
       sc = sl_bt_gatt_discover_characteristics_by_uuid(
           ble_data->connectionHandle,
-          ble_data->serviceHandle,
+          ble_data->serviceHandle_htm,
           sizeof(thermo_char_uuid),
           thermo_char_uuid);
       if (sc != SL_STATUS_OK)
@@ -204,15 +227,15 @@ void discovery_state_machine(sl_bt_msg_t *evt)
 
       else
       {
-        nextState = STATE2_DISCOVER_CHARACTERISTICS;
+        nextState = STATE2_DISCOVER_HTM_CHARACTERISTICS;
       }
     }
 
-    else if (currentState == STATE2_DISCOVER_CHARACTERISTICS)
+    else if (currentState == STATE2_DISCOVER_HTM_CHARACTERISTICS)
     {
       sc = sl_bt_gatt_set_characteristic_notification(
           ble_data->connectionHandle,
-          ble_data->characteristicHandle,
+          ble_data->characteristicHandle_htm,
           sl_bt_gatt_indication);
       if (sc != SL_STATUS_OK)
       {
@@ -220,14 +243,49 @@ void discovery_state_machine(sl_bt_msg_t *evt)
       }
       else
       {
-        nextState = STATE3_ENABLE_INDICATIONS;
+        nextState = STATE3_ENABLE_HTM_INDICATIONS;
       }
     }
 
-    else if (currentState == STATE3_ENABLE_INDICATIONS)
+    else if (currentState == STATE3_ENABLE_HTM_INDICATIONS)
     {
-      ble_data->htmIndicationsEnabled = true; // we now enable indications
+      ble_data->htmIndicationsEnabled = true;
       displayPrintf(DISPLAY_ROW_CONNECTION, "Handling Indications");
+      // now discover button service
+      sc = sl_bt_gatt_discover_primary_services_by_uuid(
+          ble_data->connectionHandle,
+          sizeof(btn_service_uuid),
+          btn_service_uuid);
+      if (sc != SL_STATUS_OK)
+      {
+        LOG_ERROR("discover btn service failed=0x%04x\n\r", (unsigned int)sc);
+      }
+      else
+      {
+        nextState = STATE4_DISCOVER_BTN_SERVICE;
+      }
+    }
+
+    else if (currentState == STATE4_DISCOVER_BTN_SERVICE)
+    {
+      sc = sl_bt_gatt_discover_characteristics_by_uuid(
+          ble_data->connectionHandle,
+          ble_data->serviceHandle_btn,
+          sizeof(btn_char_uuid),
+          btn_char_uuid);
+      if (sc != SL_STATUS_OK)
+      {
+        LOG_ERROR("sl_bt_gatt_discover_characteristics_by_uuid() returned != 0 status=0x%04x\n\r", (unsigned int)sc);
+      }
+
+      else
+      {
+        nextState = STATE5_DISCOVER_BTN_CHARACTERISTICS;
+      }
+    }
+
+    else if (currentState == STATE5_DISCOVER_BTN_CHARACTERISTICS)
+    {
       nextState = STATE0_IDLE; // just wait and go to idle
     }
     break;
