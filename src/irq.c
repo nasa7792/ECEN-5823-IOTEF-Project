@@ -29,7 +29,7 @@ void GPIO_EVEN_IRQHandler(void)
         }
     }
 }
-
+//new event for PB1 button
 void GPIO_ODD_IRQHandler(void)
 {
     uint32_t flags = GPIO_IntGet();

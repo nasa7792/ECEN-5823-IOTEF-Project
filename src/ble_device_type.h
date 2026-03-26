@@ -31,6 +31,8 @@
  * Students:
  * Set to 1 to configure this build as a BLE server.
  * Set to 0 to configure as a BLE client
+ *
+ * FOR A9 we need to consider client
  */
 #define DEVICE_IS_BLE_SERVER 0
 

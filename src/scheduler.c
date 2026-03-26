@@ -155,7 +155,11 @@ void temperature_state_machine(sl_bt_msg_t *evt)
     {
       sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
       // disable_Si7021();
-      process_temperature_reading(); //
+      if (getBleDataPtr()->connectionOpen && getBleDataPtr()->htmIndicationsEnabled)
+      {
+          //should have added this check long ago !!!
+          process_temperature_reading();
+      }
       NVIC_DisableIRQ(I2C0_IRQn);
       nextState = STATE0_WARMUP;
     }
@@ -175,6 +179,7 @@ typedef enum uint32_t
   STATE3_ENABLE_HTM_INDICATIONS,
   STATE4_DISCOVER_BTN_SERVICE,
   STATE5_DISCOVER_BTN_CHARACTERISTICS,
+  STATE6_ENABLE_BTN_INDICATIONS
 } State_disovery_t;
 
 void discovery_state_machine(sl_bt_msg_t *evt)
@@ -187,6 +192,7 @@ void discovery_state_machine(sl_bt_msg_t *evt)
   const uint8_t thermoService[2] = {0x09, 0x18}; // as per lecture slides
   const uint8_t thermo_char_uuid[2] = {0x1C, 0x2A};
 
+  // From the auto generated gatt_db.c
   const uint8_t btn_service_uuid[16] = {
       0x89, 0x62, 0x13, 0x2d, 0x2a, 0x65, 0xec, 0x87,
       0x3e, 0x43, 0xc8, 0x38, 0x01, 0x00, 0x00, 0x00};
@@ -286,7 +292,25 @@ void discovery_state_machine(sl_bt_msg_t *evt)
 
     else if (currentState == STATE5_DISCOVER_BTN_CHARACTERISTICS)
     {
-      nextState = STATE0_IDLE; // just wait and go to idle
+      // auto enable button indications
+      sc = sl_bt_gatt_set_characteristic_notification(
+          ble_data->connectionHandle,
+          ble_data->characteristicHandle_btn,
+          sl_bt_gatt_indication);
+      if (sc != SL_STATUS_OK)
+      {
+        LOG_ERROR("sl_bt_gatt_set_characteristic_notification() returned != 0 status=0x%04x\n\r", (unsigned int)sc);
+      }
+      else
+      {
+        nextState = STATE6_ENABLE_BTN_INDICATIONS;
+      }
+    }
+
+    else if (currentState == STATE6_ENABLE_BTN_INDICATIONS)
+    {
+      ble_data->btnIndicationsEnabled = true; // mark btn indications as true
+      nextState = STATE0_IDLE;
     }
     break;
 

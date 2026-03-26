@@ -4,7 +4,7 @@
  *  Created on: Feb 4, 2026
  *      Author: Nalin Saxena
  * 
- * Edited on - 2/12/2026
+ * Edited on - 3/25/2026
  * 
  * File Brief -Header file for scheduler related apis. Contains function declarations related
  * to scheduler events
@@ -16,10 +16,11 @@
 #include "sl_bt_api.h"
 
 typedef enum
-{   //as per assignmnet documents we need to support 3 events
+{   //more events to be supported
     evtLETIMER0_UnderFlow=(1U << 0), 
     evtLETIMER0_Comp1=(1U << 1),
     evtI2CTransferComplete=(1U << 2),
+    //new events
     evtPB0Pressed=(1U<<3),
     evtPB0Released=(1U<<4),
     evtPB1Pressed=(1U<<5),
@@ -52,13 +53,13 @@ called from i2c event handler irq and sets the evtI2CTransferComplete event
 void scheduler_setEvent_I2C_Transfer_Complete();
 
 /*
-called from LETimer0 irq and sets the pb0 pressed event
+ sets the pb1 pressed event
 */
 void setEvent_PB0_Pressed();
 
 
 /*
-called from LETimer0 irq and sets the pb0 released event
+ sets the pb0 released event
 */
 void setEvent_PB0_Released();
 

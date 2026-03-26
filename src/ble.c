@@ -388,6 +388,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
     // add relevant calls to display, temperature value
 
     displayPrintf(DISPLAY_ROW_TEMPVALUE, " ");
+    sl_bt_sm_delete_bondings(); //regardless if its server or client delete all old bondings, was causing issues on reset
     //do a proper cleanup
     ble_data.connectionOpen = false;
     ble_data.connectionHandle = 0;
@@ -414,6 +415,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
     app_assert_status(sc);
 #else
     displayPrintf(DISPLAY_ROW_CONNECTION, scan_msg);
+    displayPrintf(DISPLAY_ROW_9, " "); //since connection is closed we can clear this row
     // restart scanning
     sc = sl_bt_scanner_start(
         sl_bt_gap_1m_phy,
@@ -564,7 +566,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
         else
         {
           ble_data.btnIndicationsEnabled = !ble_data.btnIndicationsEnabled;
-          // if indications are turned we can clear the display row 9
+          // if indications are turned off we can clear the display row 9
           if (!ble_data.btnIndicationsEnabled)
           {
             displayPrintf(DISPLAY_ROW_9, " ");
