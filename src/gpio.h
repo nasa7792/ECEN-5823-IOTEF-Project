@@ -39,8 +39,11 @@
 #define USR_BTN1   (7)//PF7
 #define TEMP_SENSOR_ENABLE_PIN (15)
 #define DISP_EXTCOMIN (13)
-
-
+//hrspo2
+#define HRSPO2_RESET_PORT         gpioPortF
+#define HRSPO2_RESET_PIN          4
+#define HRSPO2_MFIO_PORT        gpioPortF
+#define HRSPO2_MFIO_PIN           3
 
 // Function prototypes
 void gpioInit();

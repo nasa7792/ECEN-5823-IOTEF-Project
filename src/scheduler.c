@@ -45,6 +45,16 @@ void scheduler_setEvent_I2C_Transfer_Complete()
   CORE_EXIT_CRITICAL(); // exit critical, re-enable interrupts in NVIC
 }
 
+void scheduler_setEvent_I2C_Transfer_Error()
+{
+  CORE_DECLARE_IRQ_STATE;
+  // set event
+  CORE_ENTER_CRITICAL(); // enter critical, turn off interrupts in NVIC
+  sl_bt_external_signal(evtI2CTransferError);
+  CORE_EXIT_CRITICAL(); // exit critical, re-enable interrupts in NVIC
+}
+
+
 void setEvent_PB0_Pressed()
 {
   CORE_DECLARE_IRQ_STATE;
@@ -86,19 +96,16 @@ void setEvent_PB1_Released()
 // our possible states for master
 typedef enum uint32_t
 {
-  STATE0_WARMUP,
-  STATE1_I2C_WRITE,
-  STATE2_INITIATE_CONVERSION,
-  STATE3_I2C_READ_TEMP,
-  STATE4_POWER_DOWN
+  STATE0_IDLE,
+  STATE1_WAKEUP_WAIT,
+  STATE2_I2C_READ_COMPLETE,
 } State_temp_t;
 
-void temperature_state_machine(sl_bt_msg_t *evt)
+void server_state_machine(sl_bt_msg_t *evt)
 {
-  static State_temp_t nextState = STATE0_WARMUP;
+  static State_temp_t nextState = STATE0_IDLE;
   State_temp_t currentState = nextState;
 
-  // we only react to external signals now getnextevent is dead
   if (SL_BT_MSG_ID(evt->header) != sl_bt_evt_system_external_signal_id)
     return;
 
@@ -106,68 +113,42 @@ void temperature_state_machine(sl_bt_msg_t *evt)
 
   switch (currentState)
   {
-  case STATE0_WARMUP:
-    // at each uf event we enable sensor and arm the comp1 event to fire at 80ms
+  case STATE0_IDLE:
     if (signals & evtLETIMER0_UnderFlow)
     {
-      // if no connection open then just return
-      if (getBleDataPtr()->connectionOpen == false || getBleDataPtr()->htmIndicationsEnabled == false)
-      {
-        return;
-      }
-
-      enable_Si7021();
-      timerWaitUs_irq(LOAD_PWR_MGMT_SENSOR);
-      nextState = STATE1_I2C_WRITE;
+     GPIO_PinOutClear(HRSPO2_MFIO_PORT, HRSPO2_MFIO_PIN); // wake from deep sleep
+      timerWaitUs_irq(10*1000);
+      nextState = STATE1_WAKEUP_WAIT;
     }
     break;
 
-  case STATE1_I2C_WRITE:
-    // comp1 event recieved send write command to sensor
+  case STATE1_WAKEUP_WAIT:
     if (signals & evtLETIMER0_Comp1)
     {
       sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
-      send_command_to_Si7021();
-      nextState = STATE2_INITIATE_CONVERSION;
+      read_fifo_from_HRSPO2();  // combined write+read in one transaction
+      nextState = STATE2_I2C_READ_COMPLETE;
     }
     break;
-  case STATE2_INITIATE_CONVERSION:
-    // i2c complete event recieved disable nvic i2c, and arm timer for conversion
+
+  case STATE2_I2C_READ_COMPLETE:
     if (signals & evtI2CTransferComplete)
     {
       sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
-      NVIC_DisableIRQ(I2C0_IRQn);
-      timerWaitUs_irq(CONV_TIME);
-      nextState = STATE3_I2C_READ_TEMP;
+      process_HRSPO2_values();
+      GPIO_PinOutSet(HRSPO2_MFIO_PORT, HRSPO2_MFIO_PIN); // back to deep sleep
+      nextState = STATE0_IDLE;
+    }
+    if(signals & evtI2CTransferError){
+        LOG_INFO("I2C error happened going back to idle lets try in next measurement \n \r");
+        nextState = STATE0_IDLE;
     }
     break;
-  case STATE3_I2C_READ_TEMP:
-    // conversion completed, move to power down state
-    if (signals & evtLETIMER0_Comp1)
-    {
-      read_data_from_Si7021();
-      nextState = STATE4_POWER_DOWN;
-    }
-    break;
-  case STATE4_POWER_DOWN:
-    // log values on terminal, disable sensor,go back to warm up state
-    if (signals & evtI2CTransferComplete)
-    {
-      sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
-      // disable_Si7021();
-      if (getBleDataPtr()->connectionOpen && getBleDataPtr()->htmIndicationsEnabled)
-      {
-          //should have added this check long ago !!!
-          process_temperature_reading();
-      }
-      NVIC_DisableIRQ(I2C0_IRQn);
-      nextState = STATE0_WARMUP;
-    }
-    break;
+
   default:
     break;
-  } // switch
-} // state_machine()
+  }
+}
 
 // our possible states for client
 #else

@@ -34,7 +34,7 @@
  *
  * FOR A9 we need to consider client
  */
-#define DEVICE_IS_BLE_SERVER 0
+#define DEVICE_IS_BLE_SERVER 1
 
 
 // Students:

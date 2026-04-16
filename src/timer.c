@@ -108,7 +108,7 @@ void letimer0_init(void)
   // make an init call to timer init
   LETIMER_Init(LETIMER0, &letimerInit);
 
-  // Set compare value 0 for 3 s
+  // Set compare value 0 for 5 s
   LETIMER_CompareSet(LETIMER0, 0, REQ_TICKS_SAMPLING);
   LETIMER_IntClear(LETIMER0, LETIMER_IF_UF | LETIMER_IF_COMP1);
 

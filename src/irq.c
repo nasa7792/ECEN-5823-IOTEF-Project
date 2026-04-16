@@ -92,6 +92,7 @@ void I2C0_IRQHandler(void)
   if (transferStatus < 0)
   {
     LOG_ERROR("I2C transaction failed with error code -> %d", transferStatus);
+    scheduler_setEvent_I2C_Transfer_Error();
   }
 } // I2C0_IRQHandler()
 

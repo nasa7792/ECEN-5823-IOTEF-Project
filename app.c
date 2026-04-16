@@ -174,7 +174,8 @@ SL_WEAK void app_init(void)
 #if DEVICE_IS_BLE_SERVER
   letimer0_init();
   initialize_I2C0();
-#endif
+  initiliaze_HRSPO2_SENSOR();
+  #endif
 } // app_init()
 
 
@@ -193,7 +194,6 @@ SL_WEAK void app_init(void)
 SL_WEAK void app_process_action(void)
 {
 
-// deleted all code inside the app_process_action
 
 } // app_process_action()
 
@@ -216,9 +216,9 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 
   // Just a trick to hide a compiler warning about unused input parameter evt.
   (void) evt;
-   handle_ble_event(evt); //common to both client and server
+   //handle_ble_event(evt); //common to both client and server
 #if DEVICE_IS_BLE_SERVER
-   temperature_state_machine(evt);    //server state machine
+   server_state_machine(evt);    //server state machine
 #else
    discovery_state_machine(evt);  //new! client state machine
 #endif

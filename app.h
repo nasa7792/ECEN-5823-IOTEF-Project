@@ -53,7 +53,7 @@
 #include "src/ble.h"
 
 #define LOWEST_ENERGY_MODE (2) // change this to switch b/w modes
-#define LETIMER_PERIOD_MS (3030) //sensor sampling time as specified by A3
+#define LETIMER_PERIOD_MS (5000) //sensor sampling time as specified by A3
 #define CONVERT_MS_TO_SEC (1000) //Conversion factor
 #define CONVERT_US_TO_SEC (1000000) //Conversion factor
 

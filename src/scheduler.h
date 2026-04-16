@@ -20,11 +20,12 @@ typedef enum
     evtLETIMER0_UnderFlow=(1U << 0), 
     evtLETIMER0_Comp1=(1U << 1),
     evtI2CTransferComplete=(1U << 2),
+    evtI2CTransferError=(1U<<3),
     //new events
-    evtPB0Pressed=(1U<<3),
-    evtPB0Released=(1U<<4),
-    evtPB1Pressed=(1U<<5),
-    evtPB1Released=(1U<<6),
+    evtPB0Pressed=(1U<<4),
+    evtPB0Released=(1U<<5),
+    evtPB1Pressed=(1U<<6),
+    evtPB1Released=(1U<<7),
 } event_list;
 
 
@@ -80,7 +81,7 @@ void setEvent_PB1_Released();
 a modified version of the state machine from a4, 
 the state machine is now driven by ble events
 */
-void temperature_state_machine (sl_bt_msg_t *evt);
+void server_state_machine (sl_bt_msg_t *evt);
 
 /*
 a new! state machine for the client board, which handles discovery states

@@ -65,6 +65,12 @@ void gpioInit()
   GPIO_ExtIntConfig(gpioPortF, USR_BTN1, USR_BTN1, true, true, true);
   NVIC_EnableIRQ(GPIO_EVEN_IRQn); //enable isr for pb0 button
   NVIC_EnableIRQ(GPIO_ODD_IRQn); //enable isr for pb1 button
+
+  //sensor pins initlization-
+  GPIO_PinModeSet(HRSPO2_RESET_PORT, HRSPO2_RESET_PIN,
+                  gpioModePushPull, 1);
+  GPIO_PinModeSet(HRSPO2_MFIO_PORT, HRSPO2_MFIO_PIN,
+                  gpioModePushPull, 1);
 } // gpioInit()
 
 
