@@ -53,6 +53,8 @@ called from i2c event handler irq and sets the evtI2CTransferComplete event
 */
 void scheduler_setEvent_I2C_Transfer_Complete();
 
+void scheduler_setEvent_I2C_Transfer_Error();
+
 /*
  sets the pb1 pressed event
 */

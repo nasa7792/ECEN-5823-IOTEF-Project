@@ -54,7 +54,6 @@ void scheduler_setEvent_I2C_Transfer_Error()
   CORE_EXIT_CRITICAL(); // exit critical, re-enable interrupts in NVIC
 }
 
-
 void setEvent_PB0_Pressed()
 {
   CORE_DECLARE_IRQ_STATE;
@@ -116,8 +115,14 @@ void server_state_machine(sl_bt_msg_t *evt)
   case STATE0_IDLE:
     if (signals & evtLETIMER0_UnderFlow)
     {
-     GPIO_PinOutClear(HRSPO2_MFIO_PORT, HRSPO2_MFIO_PIN); // wake from deep sleep
-      timerWaitUs_irq(10*1000);
+
+      if (getBleDataPtr()->connectionOpen == false || getBleDataPtr()->HRSO2IndicationsEnabled == false)
+      {
+        return;
+      }
+
+      GPIO_PinOutClear(HRSPO2_MFIO_PORT, HRSPO2_MFIO_PIN); // wake from deep sleep
+      timerWaitUs_irq(10 * 1000);
       nextState = STATE1_WAKEUP_WAIT;
     }
     break;
@@ -126,7 +131,7 @@ void server_state_machine(sl_bt_msg_t *evt)
     if (signals & evtLETIMER0_Comp1)
     {
       sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
-      read_fifo_from_HRSPO2();  // combined write+read in one transaction
+      read_fifo_from_HRSPO2(); // combined write+read in one transaction
       nextState = STATE2_I2C_READ_COMPLETE;
     }
     break;
@@ -135,13 +140,16 @@ void server_state_machine(sl_bt_msg_t *evt)
     if (signals & evtI2CTransferComplete)
     {
       sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
+      if (getBleDataPtr()->connectionOpen && getBleDataPtr()->HRSO2IndicationsEnabled){
       process_HRSPO2_values();
+      }
       GPIO_PinOutSet(HRSPO2_MFIO_PORT, HRSPO2_MFIO_PIN); // back to deep sleep
       nextState = STATE0_IDLE;
     }
-    if(signals & evtI2CTransferError){
-        LOG_INFO("I2C error happened going back to idle lets try in next measurement \n \r");
-        nextState = STATE0_IDLE;
+    if (signals & evtI2CTransferError)
+    {
+      LOG_INFO("I2C error happened going back to idle lets try in next measurement \n \r");
+      nextState = STATE0_IDLE;
     }
     break;
 
@@ -236,7 +244,7 @@ void discovery_state_machine(sl_bt_msg_t *evt)
 
     else if (currentState == STATE3_ENABLE_HTM_INDICATIONS)
     {
-      ble_data->htmIndicationsEnabled = true;
+      ble_data->HRSO2IndicationsEnabled = true;
       displayPrintf(DISPLAY_ROW_CONNECTION, "Handling Indications");
       // now discover button service
       sc = sl_bt_gatt_discover_primary_services_by_uuid(

@@ -13,36 +13,42 @@
 #define BTN_POS (1)
 volatile uint32_t elapsed_ms = 0;
 
-
-
 void GPIO_EVEN_IRQHandler(void)
 {
-    uint32_t flags = GPIO_IntGet();
-    GPIO_IntClear(flags);
+  uint32_t flags = GPIO_IntGet();
+  GPIO_IntClear(flags);
 
-    // Check if PB0 (pin 6) triggered the interrupt
-    if (flags & (BTN_POS << USR_BTN0)) {
-        if (GPIO_PinInGet(gpioPortF, USR_BTN0) == 0) {
-            setEvent_PB0_Pressed(); //
-        } else {
-            setEvent_PB0_Released();
-        }
+  // Check if PB0 (pin 6) triggered the interrupt
+  if (flags & (BTN_POS << USR_BTN0))
+  {
+    if (GPIO_PinInGet(gpioPortF, USR_BTN0) == 0)
+    {
+      setEvent_PB0_Pressed(); //
     }
+    else
+    {
+      setEvent_PB0_Released();
+    }
+  }
 }
-//new event for PB1 button
+// new event for PB1 button
 void GPIO_ODD_IRQHandler(void)
 {
-    uint32_t flags = GPIO_IntGet();
-    GPIO_IntClear(flags);
+  uint32_t flags = GPIO_IntGet();
+  GPIO_IntClear(flags);
 
-    // Check if PB1 (pin 7) triggered the interrupt
-    if (flags & (BTN_POS << USR_BTN1)) {
-        if (GPIO_PinInGet(gpioPortF, USR_BTN1) == 0) {
-            setEvent_PB1_Pressed(); //
-        } else {
-            setEvent_PB1_Released();
-        }
+  // Check if PB1 (pin 7) triggered the interrupt
+  if (flags & (BTN_POS << USR_BTN1))
+  {
+    if (GPIO_PinInGet(gpioPortF, USR_BTN1) == 0)
+    {
+      setEvent_PB1_Pressed(); //
     }
+    else
+    {
+      setEvent_PB1_Released();
+    }
+  }
 }
 
 void enable_LETIMER0_interrupt()
@@ -98,5 +104,5 @@ void I2C0_IRQHandler(void)
 
 uint32_t letimerMilliseconds(void)
 {
-  return elapsed_ms * 3; //each tick is 3seconds
+  return elapsed_ms * 3; // each tick is 3seconds
 }

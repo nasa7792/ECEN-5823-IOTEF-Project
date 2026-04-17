@@ -67,7 +67,6 @@ enum display_row {
 #define DISPLAY_ROW_LEN      20
 
 
-
 // function prototypes
 
 void displayInit();

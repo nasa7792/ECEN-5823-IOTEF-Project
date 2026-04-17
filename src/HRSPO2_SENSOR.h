@@ -11,6 +11,8 @@
 #define SRC_HRSPO2_SENSOR_H_
 
 #include"gpio.h"
+#include"lcd.h"
+#include "gatt_db.h"
 #include"i2c.h"
 #include"timer.h"
 

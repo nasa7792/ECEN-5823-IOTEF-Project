@@ -216,7 +216,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 
   // Just a trick to hide a compiler warning about unused input parameter evt.
   (void) evt;
-   //handle_ble_event(evt); //common to both client and server
+   handle_ble_event(evt); //common to both client and server
 #if DEVICE_IS_BLE_SERVER
    server_state_machine(evt);    //server state machine
 #else
