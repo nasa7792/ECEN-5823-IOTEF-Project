@@ -32,9 +32,8 @@
  * Set to 1 to configure this build as a BLE server.
  * Set to 0 to configure as a BLE client
  *
- * FOR A9 we need to consider client
  */
-#define DEVICE_IS_BLE_SERVER 1
+#define DEVICE_IS_BLE_SERVER 0
 
 
 // Students:
@@ -43,7 +42,7 @@
 // These values are from one of my Geckos, to serve as an example for you:
 //                   bd_addr  [0]   [1]   [2]   [3]   [4]   [5] <- array indices
 //harcoded server address as per assignment
-#define SERVER_BT_ADDRESS {0x00, 0x0D, 0x6F, 0x08, 0x62, 0x2F}
+#define SERVER_BT_ADDRESS {0x2F, 0x62, 0x08, 0x6F, 0x0D, 0x00}
 // This also can work:
 //#define SERVER_BT_ADDRESS (bd_addr) { .addr = { 0x85, 0x61, 0x17, 0x57, 0x0b, 0x00 } }
 

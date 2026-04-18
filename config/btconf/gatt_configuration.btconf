@@ -55,9 +55,18 @@
     <characteristic const="false" id="Heart_Rate_Spo2" name="Heart_Rate_Spo2" sourceId="" uuid="b3735a96-40f3-4b5e-a141-671c526c3145">
       <value length="4" type="hex" variable_length="false">00</value>
       <properties>
-        <read authenticated="false" bonded="true" encrypted="false"/>
-        <indicate authenticated="false" bonded="true" encrypted="false"/>
+        <read authenticated="false" bonded="false" encrypted="false"/>
+        <indicate authenticated="false" bonded="false" encrypted="false"/>
       </properties>
+
+      <!--Custom Descriptor-->
+      <descriptor const="false" discoverable="true" id="hrspo2_cccd" name="Custom Descriptor" sourceId="" uuid="2903">
+        <properties>
+          <read authenticated="false" bonded="false" encrypted="false"/>
+          <write authenticated="false" bonded="false" encrypted="false"/>
+        </properties>
+        <value length="4" type="hex" variable_length="false">00</value>
+      </descriptor>
     </characteristic>
   </service>
 </gatt>

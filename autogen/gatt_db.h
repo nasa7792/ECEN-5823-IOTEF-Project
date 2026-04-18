@@ -17,6 +17,7 @@ extern const sli_bt_gattdb_t gattdb;
 #define gattdb_button_state                   16
 #define gattdb_HRSPO2_Monitor                 18
 #define gattdb_Heart_Rate_Spo2                20
+#define gattdb_hrspo2_cccd                    22
 
 
 #endif // __GATT_DB_H

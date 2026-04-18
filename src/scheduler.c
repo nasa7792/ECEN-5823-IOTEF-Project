@@ -163,12 +163,9 @@ void server_state_machine(sl_bt_msg_t *evt)
 typedef enum uint32_t
 {
   STATE0_IDLE,
-  STATE1_DISCOVER_HTM_SERVICE,
-  STATE2_DISCOVER_HTM_CHARACTERISTICS,
-  STATE3_ENABLE_HTM_INDICATIONS,
-  STATE4_DISCOVER_BTN_SERVICE,
-  STATE5_DISCOVER_BTN_CHARACTERISTICS,
-  STATE6_ENABLE_BTN_INDICATIONS
+  STATE1_DISCOVER_HRSPO2_SERVICE,
+  STATE2_DISCOVER_HRSPO2_CHARACTERISTICS,
+  STATE3_ENABLE_HRSPO2_INDICATIONS,
 } State_disovery_t;
 
 void discovery_state_machine(sl_bt_msg_t *evt)
@@ -178,17 +175,12 @@ void discovery_state_machine(sl_bt_msg_t *evt)
   sl_status_t sc;
   ble_data_struct_t *ble_data = getBleDataPtr();
   // services and characteristic uuids
-  const uint8_t thermoService[2] = {0x09, 0x18}; // as per lecture slides
-  const uint8_t thermo_char_uuid[2] = {0x1C, 0x2A};
-
   // From the auto generated gatt_db.c
-  const uint8_t btn_service_uuid[16] = {
-      0x89, 0x62, 0x13, 0x2d, 0x2a, 0x65, 0xec, 0x87,
-      0x3e, 0x43, 0xc8, 0x38, 0x01, 0x00, 0x00, 0x00};
+   const uint8_t hrspo2_service_uuid[16] = {
+       0xf5, 0x1c, 0x1c, 0x4e, 0xc9, 0xb8, 0x55, 0x96, 0x10, 0x49, 0x84, 0x2f, 0x9c, 0x16, 0x1d, 0xfa, };
 
-  const uint8_t btn_char_uuid[16] = {
-      0x89, 0x62, 0x13, 0x2d, 0x2a, 0x65, 0xec, 0x87,
-      0x3e, 0x43, 0xc8, 0x38, 0x02, 0x00, 0x00, 0x00};
+  const uint8_t hrspo2_char_uuid[16] = {
+      0x45, 0x31, 0x6c, 0x52, 0x1c, 0x67, 0x41, 0xa1, 0x5e, 0x4b, 0xf3, 0x40, 0x96, 0x5a, 0x73, 0xb3};
 
   switch (SL_BT_MSG_ID(evt->header))
   {
@@ -196,25 +188,25 @@ void discovery_state_machine(sl_bt_msg_t *evt)
     // we need to scan for our temperature service by uuid
     sc = sl_bt_gatt_discover_primary_services_by_uuid(
         ble_data->connectionHandle, // already set by the handle_ble_event
-        sizeof(thermoService),
-        thermoService);
+        sizeof(hrspo2_service_uuid),
+        hrspo2_service_uuid);
     if (sc != SL_STATUS_OK)
     {
       LOG_ERROR("sl_bt_gatt_discover_primary_services_by_uuid() returned != 0 status=0x%04x\n\r", (unsigned int)sc);
     }
     else
     {
-      nextState = STATE1_DISCOVER_HTM_SERVICE; // if no error move to next state
+      nextState = STATE1_DISCOVER_HRSPO2_SERVICE; // if no error move to next state
     }
     break;
   case sl_bt_evt_gatt_procedure_completed_id: // this is a common event for multiple state changes
-    if (currentState == STATE1_DISCOVER_HTM_SERVICE)
+    if (currentState == STATE1_DISCOVER_HRSPO2_SERVICE)
     {
       sc = sl_bt_gatt_discover_characteristics_by_uuid(
           ble_data->connectionHandle,
-          ble_data->serviceHandle_htm,
-          sizeof(thermo_char_uuid),
-          thermo_char_uuid);
+          ble_data->serviceHandle_hrspo2,
+          sizeof(hrspo2_char_uuid),
+          hrspo2_char_uuid);
       if (sc != SL_STATUS_OK)
       {
         LOG_ERROR("sl_bt_gatt_discover_characteristics_by_uuid() returned != 0 status=0x%04x\n\r", (unsigned int)sc);
@@ -222,15 +214,15 @@ void discovery_state_machine(sl_bt_msg_t *evt)
 
       else
       {
-        nextState = STATE2_DISCOVER_HTM_CHARACTERISTICS;
+        nextState = STATE2_DISCOVER_HRSPO2_CHARACTERISTICS;
       }
     }
 
-    else if (currentState == STATE2_DISCOVER_HTM_CHARACTERISTICS)
+    else if (currentState == STATE2_DISCOVER_HRSPO2_CHARACTERISTICS)
     {
       sc = sl_bt_gatt_set_characteristic_notification(
           ble_data->connectionHandle,
-          ble_data->characteristicHandle_htm,
+          ble_data->characteristicHandle_hrspo2,
           sl_bt_gatt_indication);
       if (sc != SL_STATUS_OK)
       {
@@ -238,68 +230,15 @@ void discovery_state_machine(sl_bt_msg_t *evt)
       }
       else
       {
-        nextState = STATE3_ENABLE_HTM_INDICATIONS;
+        nextState = STATE3_ENABLE_HRSPO2_INDICATIONS;
       }
     }
 
-    else if (currentState == STATE3_ENABLE_HTM_INDICATIONS)
+    else if (currentState == STATE3_ENABLE_HRSPO2_INDICATIONS)
     {
       ble_data->HRSO2IndicationsEnabled = true;
       displayPrintf(DISPLAY_ROW_CONNECTION, "Handling Indications");
-      // now discover button service
-      sc = sl_bt_gatt_discover_primary_services_by_uuid(
-          ble_data->connectionHandle,
-          sizeof(btn_service_uuid),
-          btn_service_uuid);
-      if (sc != SL_STATUS_OK)
-      {
-        LOG_ERROR("discover btn service failed=0x%04x\n\r", (unsigned int)sc);
-      }
-      else
-      {
-        nextState = STATE4_DISCOVER_BTN_SERVICE;
-      }
-    }
-
-    else if (currentState == STATE4_DISCOVER_BTN_SERVICE)
-    {
-      sc = sl_bt_gatt_discover_characteristics_by_uuid(
-          ble_data->connectionHandle,
-          ble_data->serviceHandle_btn,
-          sizeof(btn_char_uuid),
-          btn_char_uuid);
-      if (sc != SL_STATUS_OK)
-      {
-        LOG_ERROR("sl_bt_gatt_discover_characteristics_by_uuid() returned != 0 status=0x%04x\n\r", (unsigned int)sc);
-      }
-
-      else
-      {
-        nextState = STATE5_DISCOVER_BTN_CHARACTERISTICS;
-      }
-    }
-
-    else if (currentState == STATE5_DISCOVER_BTN_CHARACTERISTICS)
-    {
-      // auto enable button indications
-      sc = sl_bt_gatt_set_characteristic_notification(
-          ble_data->connectionHandle,
-          ble_data->characteristicHandle_btn,
-          sl_bt_gatt_indication);
-      if (sc != SL_STATUS_OK)
-      {
-        LOG_ERROR("sl_bt_gatt_set_characteristic_notification() returned != 0 status=0x%04x\n\r", (unsigned int)sc);
-      }
-      else
-      {
-        nextState = STATE6_ENABLE_BTN_INDICATIONS;
-      }
-    }
-
-    else if (currentState == STATE6_ENABLE_BTN_INDICATIONS)
-    {
-      ble_data->btnIndicationsEnabled = true; // mark btn indications as true
-      nextState = STATE0_IDLE;
+      nextState=STATE0_IDLE;
     }
     break;
 

@@ -65,6 +65,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
              address.addr[1],
              address.addr[0]);
 
+
     // add relevant calls to display, text server, assignment name, ble address
     displayInit();
 /*server logic starts*/
@@ -112,7 +113,6 @@ void handle_ble_event(sl_bt_msg_t *evt)
 #else
     displayPrintf(DISPLAY_ROW_NAME, BLE_DEVICE_TYPE_STRING);
     displayPrintf(DISPLAY_ROW_BTADDR, addrStr);
-    displayPrintf(DISPLAY_ROW_ASSIGNMENT, Assignment_str);
     displayPrintf(DISPLAY_ROW_CONNECTION, scan_msg);
 
     // set scanning mode use passive scanning as per assignment
@@ -275,13 +275,17 @@ void handle_ble_event(sl_bt_msg_t *evt)
     uint8_t sf = evt->data.evt_gatt_server_characteristic_status.status_flags;
     uint16_t ccf = evt->data.evt_gatt_server_characteristic_status.client_config_flags;
     // client requested a change ?
+    LOG_INFO("this event is here \n \r");
     if (sf == sl_bt_gatt_server_client_config)
     {
+        LOG_INFO("turning on indications for hrspo2 0 \n \r");
       // Dealing with temperature values ??
       if (characteristic == gattdb_Heart_Rate_Spo2)
       {
+          LOG_INFO("turning on indications for hrspo2 1 \n \r");
         if (ccf == sl_bt_gatt_server_indication)
         {
+          LOG_INFO("turning on indications for hrspo2 2 \n \r");
           ble_data.HRSO2IndicationsEnabled = true;
           displayPrintf(DISPLAY_ROW_ACTION, "Health Stats are:");
           gpioLed0SetOn(); // led 0 is on if htm indications are enabled
@@ -326,7 +330,6 @@ void handle_ble_event(sl_bt_msg_t *evt)
   case sl_bt_evt_system_external_signal_id:
   {
     uint32_t signals = evt->data.evt_system_external_signal.extsignals;
-    uint8_t btn_state;
     // deal with external button pressed events
 #if DEVICE_IS_BLE_SERVER
     if (signals & evtPB0Pressed)
@@ -348,70 +351,15 @@ void handle_ble_event(sl_bt_msg_t *evt)
       }
     }
 
-    if (signals & evtPB0Released)
-    {
-      // pb1 must have been pressed for toggling indications
-      if (ble_data.wasPB1Pressed)
-      {
-        sc = sl_bt_gatt_set_characteristic_notification(
-            ble_data.connectionHandle,
-            ble_data.characteristicHandle_btn,
-            ble_data.btnIndicationsEnabled ? sl_bt_gatt_disable : sl_bt_gatt_indication);
-        if (sc != SL_STATUS_OK)
-        {
-          LOG_ERROR("toggle btn indications failed=0x%04x\n\r", (unsigned int)sc);
-        }
-        else
-        {
-          ble_data.btnIndicationsEnabled = !ble_data.btnIndicationsEnabled;
-          // if indications are turned off we can clear the display row 9
-          if (!ble_data.btnIndicationsEnabled)
-          {
-            displayPrintf(DISPLAY_ROW_9, " ");
-          }
-        }
-      }
 
-      ble_data.isPB0Held = false;
-      ble_data.wasPB1Pressed = false;
-    }
 
-    // handle pb1 presses, each pb1 press is a new read request
-    if (signals & evtPB1Pressed)
-    {
-      // we need to make sure that pb0 is not held
-      if (!ble_data.isPB0Held)
-      {
-        if (!ble_data.isReadRequestInflight && ble_data.connectionOpen)
-        {
-          sc = sl_bt_gatt_read_characteristic_value(
-              ble_data.connectionHandle,
-              ble_data.characteristicHandle_btn);
-          if (sc != SL_STATUS_OK)
-          {
-            LOG_ERROR("read btn characteristic failed=0x%04x\n\r", (unsigned int)sc);
-          }
-          else
-          {
-            ble_data.isReadRequestInflight = true;
-          }
-        }
-      }
-    }
-
-    if (signals & evtPB1Released)
-    {
-      if (ble_data.isPB0Held)
-      {
-        ble_data.wasPB1Pressed = true;
-      }
-    }
 #endif
 
     break;
   }
 
   case sl_bt_evt_sm_bonded_id:
+    LOG_INFO("bonding done \n \r");
     ble_data.bonded = true;
     // clear up the display rows
     displayPrintf(DISPLAY_ROW_PASSKEY, " ");
@@ -439,6 +387,8 @@ void handle_ble_event(sl_bt_msg_t *evt)
   case sl_bt_evt_scanner_scan_report_id:
   {
     sl_bt_evt_scanner_scan_report_t *report = &evt->data.evt_scanner_scan_report;
+
+
     // must be an adversitement packet
     if (report->packet_type != 0)
     {
@@ -447,8 +397,10 @@ void handle_ble_event(sl_bt_msg_t *evt)
     // check if servers address is present
     if (memcmp(report->address.addr, server_addr, 6) != 0)
     {
+
       break;
     }
+    LOG_INFO("server presnet \n \r");
 
     sc = sl_bt_scanner_stop();
     app_assert_status(sc);
@@ -472,14 +424,10 @@ void handle_ble_event(sl_bt_msg_t *evt)
       uint8_t *uuid = evt->data.evt_gatt_service.uuid.data;
       uint8_t len = evt->data.evt_gatt_service.uuid.len;
 
-      if (len == 2 && uuid[0] == 0x09 && uuid[1] == 0x18)
+      if (len ==16)
       {
         // we found the htm service !
-        ble_data.serviceHandle_htm = evt->data.evt_gatt_service.service;
-      }
-      else
-      {
-        ble_data.serviceHandle_btn = evt->data.evt_gatt_service.service;
+        ble_data.serviceHandle_hrspo2 = evt->data.evt_gatt_service.service;
       }
     }
     break;
@@ -489,13 +437,10 @@ void handle_ble_event(sl_bt_msg_t *evt)
   {
     uint8_t *uuid = evt->data.evt_gatt_characteristic.uuid.data;
     uint8_t len = evt->data.evt_gatt_characteristic.uuid.len;
-    if (len == 2 && uuid[0] == 0x1C && uuid[1] == 0x2A) // 0x2A1C htm characteristic
+    if (len ==16) // fix this later
     {
-      ble_data.characteristicHandle_htm = evt->data.evt_gatt_characteristic.characteristic;
-    }
-    else if (len == 16)
-    {
-      ble_data.characteristicHandle_btn = evt->data.evt_gatt_characteristic.characteristic;
+        LOG_INFO("Found hrspo2 service \n \r");
+      ble_data.characteristicHandle_hrspo2 = evt->data.evt_gatt_characteristic.characteristic;
     }
   }
   break;
@@ -514,14 +459,20 @@ void handle_ble_event(sl_bt_msg_t *evt)
       }
     }
     uint8_t *data = evt->data.evt_gatt_characteristic_value.value.data;
-    if (char_handle == ble_data.characteristicHandle_htm)
+    if (char_handle == ble_data.characteristicHandle_hrspo2)
     {
-      float temperature = temperature_conv(data);
-      displayPrintf(DISPLAY_ROW_TEMPVALUE, "Temp=%.2f C", temperature);
-    }
-    if (char_handle == ble_data.characteristicHandle_btn)
-    {
-      displayPrintf(DISPLAY_ROW_9, data[0] == 1 ? "Button Pressed" : "Button Released");
+        LOG_INFO("Found hrspo2 value \n \r");
+        uint16_t hr_raw   = (data[0] << 8) | data[1];
+        uint16_t spo2_raw = (data[2] << 8) | data[3];
+        float hr   = hr_raw   / 10.0f;
+        float spo2 = spo2_raw / 10.0f;
+        char hr_str[16];
+        char spo2_str[16];
+        snprintf(hr_str,   sizeof(hr_str),   "HR=%.1f bpm", hr);
+        snprintf(spo2_str, sizeof(spo2_str), "SpO2=%.1f%%", spo2);
+
+        displayPrintf(DISPLAY_ROW_8, hr_str);
+        displayPrintf(DISPLAY_ROW_9,    spo2_str);
     }
   }
   break;

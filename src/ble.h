@@ -15,36 +15,6 @@
 #include "ble_device_type.h"
 #include"lcd.h"
 
-#define QUEUE_DEPTH      (16)
-
-// taken from lecture slides
-#define UINT8_TO_BITSTREAM(p, n) \
-    {                            \
-        *(p)++ = (uint8_t)(n);   \
-    }
-
-// taken from lecture slides
-#define UINT32_TO_BITSTREAM(p, n)      \
-    {                                  \
-        *(p)++ = (uint8_t)(n);         \
-        *(p)++ = (uint8_t)((n) >> 8);  \
-        *(p)++ = (uint8_t)((n) >> 16); \
-        *(p)++ = (uint8_t)((n) >> 24); \
-    }
-#define INT32_TO_FLOAT(m, e) ((int32_t)(((uint32_t)m) & 0x00FFFFFFU) | (((uint32_t)e) << 24))
-
-#define MAX_BUFFER_LENGTH  (5)
-#define MIN_BUFFER_LENGTH  (1)
-
-//taken from assignment from 0.5
-typedef struct {
-
-  uint32_t       bufLength;                  // Number of bytes written to field buffer[5]
-  uint16_t       charHandle;                 // GATT DB handle from gatt_db.h
-  uint8_t        buffer[1];                      //only need 1 byte for btn state
-
-} queue_struct_t;
-
 
 // BLE Data Structure, save all of our private BT data in here.
 // Modern C (circa 2021 does it this way)

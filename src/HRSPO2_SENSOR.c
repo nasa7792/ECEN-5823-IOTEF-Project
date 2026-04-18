@@ -115,6 +115,8 @@ void process_HRSPO2_values(void)
             {
                 LOG_ERROR("write_attribute_value failed: 0x%04x\n\r", (unsigned int)sc);
             }
+
+
             ble_data_struct_t *ble = getBleDataPtr();
             if (ble->connectionOpen &&
                 ble->HRSO2IndicationsEnabled &&
@@ -123,7 +125,7 @@ void process_HRSPO2_values(void)
                 sc = sl_bt_gatt_server_send_indication(
                     ble->connectionHandle,
                     gattdb_Heart_Rate_Spo2, // handle from gatt_db.h
-                    4,
+                    sizeof(hrspo2_buffer),
                     hrspo2_buffer);
                 if (sc != SL_STATUS_OK)
                 {
