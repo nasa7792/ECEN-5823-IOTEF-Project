@@ -71,6 +71,10 @@ void gpioInit()
                   gpioModePushPull, 1);
   GPIO_PinModeSet(HRSPO2_MFIO_PORT, HRSPO2_MFIO_PIN,
                   gpioModePushPull, 1);
+
+  //for the adxl343 sensor
+  GPIO_PinModeSet(ADXL343_INT_PORT, ADXL343_INT_PIN, gpioModeInputPullFilter, 0);
+  GPIO_ExtIntConfig(ADXL343_INT_PORT, ADXL343_INT_PIN, ADXL343_INT_PIN, true, false, true);
 } // gpioInit()
 
 

@@ -49,6 +49,7 @@
 #define APP_H
 #include"src/i2c.h"
 #include "src/scheduler.h"
+#include"src/ADXL343.h"
 #include "src/ble_device_type.h"
 #include "src/ble.h"
 

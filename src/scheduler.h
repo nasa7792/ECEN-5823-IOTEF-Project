@@ -13,6 +13,7 @@
 #ifndef SRC_SCHEDULER_H_
 #define SRC_SCHEDULER_H_
 #include "em_core_generic.h"
+#include "ADXL343.h"
 #include "sl_bt_api.h"
 
 typedef enum
@@ -26,6 +27,7 @@ typedef enum
     evtPB0Released=(1U<<5),
     evtPB1Pressed=(1U<<6),
     evtPB1Released=(1U<<7),
+    evtADXL343_Freefall = (1U << 8),
 } event_list;
 
 
@@ -77,6 +79,9 @@ void setEvent_PB1_Pressed();
 sets the pb1 released event
 */
 void setEvent_PB1_Released();
+
+void setEvent_ADXL343_Freefall();
+void adxl343_state_machine(sl_bt_msg_t *evt);
 
 
 /*

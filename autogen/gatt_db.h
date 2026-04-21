@@ -18,6 +18,9 @@ extern const sli_bt_gattdb_t gattdb;
 #define gattdb_HRSPO2_Monitor                 18
 #define gattdb_Heart_Rate_Spo2                20
 #define gattdb_hrspo2_cccd                    22
+#define gattdb_Fall_Detection_Service         23
+#define gattdb_Fall_characteristic            25
+#define gattdb_fall_cccd                      27
 
 
 #endif // __GATT_DB_H

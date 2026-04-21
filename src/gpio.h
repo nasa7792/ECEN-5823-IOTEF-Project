@@ -29,6 +29,7 @@
 #ifndef SRC_GPIO_H_
 #define SRC_GPIO_H_
 #include"stdbool.h"
+#include"ADXL343.h"
 
 //After reviewing https://www.silabs.com/documents/public/user-guides/ug279-brd4104a-user-guide.pdf
 #define LED_port   (gpioPortF)

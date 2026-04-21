@@ -175,6 +175,8 @@ SL_WEAK void app_init(void)
   letimer0_init();
   initialize_I2C0();
   initiliaze_HRSPO2_SENSOR();
+  initialize_ADXL343();// 
+
   #endif
 } // app_init()
 

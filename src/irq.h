@@ -11,6 +11,7 @@
 #define SRC_IRQ_H_
 
 #include"gpio.h"
+#include"ADXL343.h"
 #include "i2c.h"
 #include "em_letimer.h"
 #include"scheduler.h"

@@ -73,7 +73,50 @@ void process_ADXL343_values(void)
     if (src & INT_SRC_FREEFALL) {
         LOG_INFO("*** FREEFALL DETECTED! ***\n\r");
     }
+
+    src=0x10;
+
+    // -------------------------------
+    // Write our local GATT DB
+    // -------------------------------
+    sl_status_t sc = sl_bt_gatt_server_write_attribute_value(
+        gattdb_Fall_characteristic,
+        0,
+        sizeof(src),
+        &src);
+    if (sc != SL_STATUS_OK)
+    {
+        LOG_ERROR("write_attribute_value failed: 0x%04x\n\r", (unsigned int)sc);
+    }
+
+    LOG_INFO("Sending indications now  for fall detection \n \r");
+    ble_data_struct_t *ble = getBleDataPtr();
+    if (ble->connectionOpen &&
+        ble->FallDetection_Indications_Enabled)
+    {
+        LOG_INFO("Sending indications now  for fall detection inside  2 \n \r");
+        sc = sl_bt_gatt_server_send_indication(
+            ble->connectionHandle,
+            gattdb_Fall_characteristic, // handle from gatt_db.h
+            sizeof(src),
+            &src);
+        if (sc != SL_STATUS_OK)
+        {
+            LOG_ERROR("sl_bt_gatt_server_send_indication failed with status code of status=0x%04x  \n \r", (unsigned int)sc);
+        }
+        else
+        {
+            LOG_INFO("indications sent from fall service \n \r");
+            ble->is_Indication_Inflight = true;
+        }
+    }
 }
+
+
+
+
+
+
 
 uint8_t adxl_read_register(uint8_t reg)
 {

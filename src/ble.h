@@ -40,6 +40,8 @@ typedef struct
     bool isPB0Held; //if pb0 is held and we press and release pb
     bool wasPB1Pressed; //track if PB1was pressed
 
+    bool FallDetection_Indications_Enabled;
+
     // values unique for client
 } ble_data_struct_t;
 

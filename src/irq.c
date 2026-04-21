@@ -49,6 +49,14 @@ void GPIO_ODD_IRQHandler(void)
       setEvent_PB1_Released();
     }
   }
+  LOG_INFO("isr happened 1 \n \r");
+
+  /* ADXL343 INT1 on PD9 */
+  if (flags & (1 << ADXL343_INT_PIN))
+  {
+      LOG_INFO("isr happened 2 \n \r");
+    setEvent_ADXL343_Freefall();
+  }
 }
 
 void enable_LETIMER0_interrupt()
@@ -91,6 +99,7 @@ void I2C0_IRQHandler(void)
   // that we put into the data structure passed
   // to I2C_TransferInit()
   transferStatus = I2C_Transfer(I2C0);
+  LOG_INFO("I2C ISR happened \n \r %d",transferStatus);
   if (transferStatus == i2cTransferDone)
   {
     scheduler_setEvent_I2C_Transfer_Complete();
