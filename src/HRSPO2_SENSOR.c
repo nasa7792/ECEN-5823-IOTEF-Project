@@ -133,7 +133,7 @@ void process_HRSPO2_values(void)
                 }
                 else
                 {
-                    LOG_INFO("indications sent \n \r");
+                    LOG_INFO("indications sent hrspo2 \n \r");
                     ble->is_Indication_Inflight = true;
                 }
             }

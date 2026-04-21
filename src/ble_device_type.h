@@ -33,7 +33,7 @@
  * Set to 0 to configure as a BLE client
  *
  */
-#define DEVICE_IS_BLE_SERVER 0
+#define DEVICE_IS_BLE_SERVER 1
 
 
 // Students:

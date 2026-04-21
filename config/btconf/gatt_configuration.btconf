@@ -69,4 +69,26 @@
       </descriptor>
     </characteristic>
   </service>
+
+  <!--Fall Detection Service-->
+  <service advertise="true" id="Fall_Detection_Service" name="Fall Detection Service" requirement="mandatory" sourceId="" type="primary" uuid="b5eb8ce9-bc63-4854-ad78-1f4a55f0f54a">
+
+    <!--Fall characteristic-->
+    <characteristic const="false" id="Fall_characteristic" name="Fall characteristic" sourceId="" uuid="a27868e3-059a-4ce7-b619-fa15f62fc610">
+      <value length="1" type="hex" variable_length="false">00</value>
+      <properties>
+        <read authenticated="false" bonded="false" encrypted="false"/>
+        <indicate authenticated="false" bonded="false" encrypted="false"/>
+      </properties>
+
+      <!--fall_cccd-->
+      <descriptor const="false" discoverable="true" id="fall_cccd" name="fall_cccd" sourceId="" uuid="f9552d06-6fa7-4c54-8d54-aa77b62868d9">
+        <properties>
+          <read authenticated="false" bonded="false" encrypted="false"/>
+          <write authenticated="false" bonded="false" encrypted="false"/>
+        </properties>
+        <value length="1" type="hex" variable_length="false">00</value>
+      </descriptor>
+    </characteristic>
+  </service>
 </gatt>
