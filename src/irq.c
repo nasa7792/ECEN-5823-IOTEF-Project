@@ -2,7 +2,7 @@
  * irq.c
  *
  *  Created on: Jan 25, 2026
- *      Author: Nalin Saxena
+ *      Author: Nalin Saxena and Abhirath Koushik
  * File Brief- Implementation file for IRQ configuration apis and irq handler. Contains function def related
  * to IRQ enabling for LETIMER0 and irq hanlder which calls for a temp reading
  */
@@ -49,12 +49,10 @@ void GPIO_ODD_IRQHandler(void)
       setEvent_PB1_Released();
     }
   }
-  LOG_INFO("isr happened 1 \n \r");
 
-  /* ADXL343 INT1 on PD9 */
+  /* ADXL343 INT1 on PC7 */
   if (flags & (1 << ADXL343_INT_PIN))
   {
-      LOG_INFO("isr happened 2 \n \r");
     setEvent_ADXL343_Freefall();
   }
 }
@@ -99,7 +97,6 @@ void I2C0_IRQHandler(void)
   // that we put into the data structure passed
   // to I2C_TransferInit()
   transferStatus = I2C_Transfer(I2C0);
-  LOG_INFO("I2C ISR happened \n \r %d",transferStatus);
   if (transferStatus == i2cTransferDone)
   {
     scheduler_setEvent_I2C_Transfer_Complete();
