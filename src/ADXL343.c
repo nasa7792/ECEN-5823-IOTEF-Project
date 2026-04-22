@@ -111,3 +111,17 @@ void process_ADXL343_values(void)
         }
     }
 }
+
+uint8_t adxl_read_register(uint8_t reg)
+{
+    uint8_t val = 0;
+    adxl_tx_buf[0] = reg;
+    transferSequence.addr        = ADXL343_I2C_ADDR << 1;
+    transferSequence.flags       = I2C_FLAG_WRITE_READ;
+    transferSequence.buf[0].data = adxl_tx_buf;
+    transferSequence.buf[0].len  = 1;
+    transferSequence.buf[1].data = &val;
+    transferSequence.buf[1].len  = 1;
+    I2CSPM_Transfer(I2C0, &transferSequence);
+    return val;
+}
