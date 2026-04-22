@@ -2,7 +2,7 @@
  * scheduler.c
  *
  *  Created on: Feb 4, 2026
- *      Author: Nalin Saxena
+ *      Author: Nalin Saxena and Abhirath Koushik
  *
  *  Edited on - 3/4/2026
  *
@@ -106,7 +106,6 @@ typedef enum uint32_t
   STATE0_IDLE,
   STATE1_WAKEUP_WAIT,
   STATE2_I2C_READ_COMPLETE,
-  STATE3_CHECK_FREE_FALL
 } State_temp_t;
 
 void server_state_machine(sl_bt_msg_t *evt)
@@ -118,6 +117,12 @@ void server_state_machine(sl_bt_msg_t *evt)
     return;
 
   uint32_t signals = evt->data.evt_system_external_signal.extsignals;
+
+  // Check for Free Fall Interrupt
+  if (signals & evtADXL343_Freefall)
+  {
+      process_ADXL343_values();
+  }
 
   switch (currentState)
   {
@@ -153,39 +158,19 @@ void server_state_machine(sl_bt_msg_t *evt)
       process_HRSPO2_values();
       }
       GPIO_PinOutSet(HRSPO2_MFIO_PORT, HRSPO2_MFIO_PIN); // back to deep sleep
-      nextState = STATE3_CHECK_FREE_FALL;
+      nextState = STATE0_IDLE;
     }
     if (signals & evtI2CTransferError)
     {
       LOG_INFO("I2C error happened going back to idle lets try in next measurement \n \r");
-      nextState = STATE3_CHECK_FREE_FALL;
+      nextState = STATE0_IDLE;
     }
     break;
 
-  case STATE3_CHECK_FREE_FALL:
-    if (true)
-    {
-    LOG_INFO("In free fall state \n \r");
-    process_ADXL343_values();
-    nextState=STATE0_IDLE;
-    }
-    break;
   default:
     break;
   }
 }
-
-//void adxl343_state_machine(sl_bt_msg_t *evt)
-//{
-//    if (SL_BT_MSG_ID(evt->header) != sl_bt_evt_system_external_signal_id)
-//    return;
-//    uint32_t signals = evt->data.evt_system_external_signal.extsignals;
-//    if (signals & evtADXL343_Freefall)
-//    {
-//   LOG_INFO("something happened 2\n \r");
-//    process_ADXL343_values();
-//    }
-//}
 
 // our possible states for client
 #else
