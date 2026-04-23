@@ -11,6 +11,7 @@
 #define SRC_BLE_H_
 #include "app_assert.h"
 #include "sl_bt_api.h"
+#include "sl_sleeptimer.h"
 #include "gatt_db.h"
 #include "ble_device_type.h"
 #include"lcd.h"
@@ -30,6 +31,10 @@ typedef struct
     uint32_t  serviceHandle_hrspo2;
     uint16_t characteristicHandle_hrspo2;
     uint8_t connectionHandle;
+
+    uint32_t serviceHandle_fall;
+    uint16_t characteristicHandle_fall;
+    bool fall_alert_active;
 
     bool HRSO2IndicationsEnabled;  // a bool flag for htm indications enabled
     bool is_Indication_Inflight; // a bool flag for indications in flight

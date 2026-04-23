@@ -101,6 +101,12 @@ void gpioLed1SetOff()
 	GPIO_PinOutClear(LED_port, LED1_pin);
 }
 
+void gpioLed1Toggle()
+{
+    // GPIO_PinOutToggle is a built-in function that flips the current state
+    GPIO_PinOutToggle(LED_port, LED1_pin);
+}
+
 
 void enable_display()
 {

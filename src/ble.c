@@ -6,12 +6,30 @@
  *
  *  File Brief- Implementation file for All BLE related Apis, and helper macros
  */
+
+#include <stdio.h>
+#include <string.h>
+
 #define INCLUDE_LOG_DEBUG 1
 #include "log.h"
 #include "ble.h"
 #include "math.h"
+#include "gpio.h"
+
 
 ble_data_struct_t ble_data;
+sl_sleeptimer_timer_handle_t blink_timer;
+
+void blink_timer_callback(sl_sleeptimer_timer_handle_t *handle, void *data)
+{
+    (void)handle;
+    (void)data;
+
+    // Toggle the LED every time the timer fires
+    if (ble_data.fall_alert_active) {
+        gpioLed1Toggle();
+    }
+}
 
 void handle_ble_event(sl_bt_msg_t *evt)
 {
@@ -19,7 +37,7 @@ void handle_ble_event(sl_bt_msg_t *evt)
   sl_status_t sc;
   bd_addr address;
   uint8_t address_type;
-  const char adv_msg[] = "Searching Caregiver";
+  const char adv_msg[] = "Search Caregiver";
   const char scan_msg[] = "Discovering";
 
   // server address
@@ -350,6 +368,21 @@ void handle_ble_event(sl_bt_msg_t *evt)
     if (signals & evtPB0Pressed)
     {
       ble_data.isPB0Held = true;
+
+      if (ble_data.fall_alert_active) {
+          LOG_INFO("Caregiver acknowledged fall alert via PB0\n\r");
+          ble_data.fall_alert_active = false;
+
+          // Stop Timer 1
+          sl_sleeptimer_stop_timer(&blink_timer);
+
+          // Turn LED1 Off
+          gpioLed1SetOff();
+
+          // Clear the LCD warning
+          displayPrintf(DISPLAY_ROW_ACTION, "Alert Cleared");
+      }
+
       if (ble_data.waitingForConfirmation == true)
       {
         sl_bt_sm_passkey_confirm(ble_data.connectionHandle, 1);
@@ -420,34 +453,6 @@ void handle_ble_event(sl_bt_msg_t *evt)
   }
   break;
 
-    // since we are dealing with multiple services now we nede to look for a per uuid basis
-  case sl_bt_evt_gatt_service_id:
-    // store service handle
-    {
-      uint8_t *uuid = evt->data.evt_gatt_service.uuid.data;
-      uint8_t len = evt->data.evt_gatt_service.uuid.len;
-
-      if (len == 16)
-      {
-        // we found the htm service !
-        ble_data.serviceHandle_hrspo2 = evt->data.evt_gatt_service.service;
-      }
-    }
-    break;
-
-    // since we are dealing with multiple services now we nede to look for a per uuid basis
-  case sl_bt_evt_gatt_characteristic_id:
-  {
-    uint8_t *uuid = evt->data.evt_gatt_characteristic.uuid.data;
-    uint8_t len = evt->data.evt_gatt_characteristic.uuid.len;
-    if (len == 16) // fix this later
-    {
-      LOG_INFO("Found hrspo2 service \n \r");
-      ble_data.characteristicHandle_hrspo2 = evt->data.evt_gatt_characteristic.characteristic;
-    }
-  }
-  break;
-
   case sl_bt_evt_gatt_characteristic_value_id:
   {
     uint16_t char_handle = evt->data.evt_gatt_characteristic_value.characteristic;
@@ -464,19 +469,38 @@ void handle_ble_event(sl_bt_msg_t *evt)
     uint8_t *data = evt->data.evt_gatt_characteristic_value.value.data;
     if (char_handle == ble_data.characteristicHandle_hrspo2)
     {
-      LOG_INFO("Found hrspo2 value \n \r");
       uint16_t hr_raw = (data[0] << 8) | data[1];
       uint16_t spo2_raw = (data[2] << 8) | data[3];
-      float hr = hr_raw / 10.0f;
-      float spo2 = spo2_raw / 10.0f;
+
       char hr_str[16];
       char spo2_str[16];
-      snprintf(hr_str, sizeof(hr_str), "HR=%.1f bpm", hr);
-      snprintf(spo2_str, sizeof(spo2_str), "SpO2=%.1f%%", spo2);
+
+      uint16_t hr_whole   = hr_raw / 10;
+      uint16_t hr_decimal = hr_raw % 10;
+
+      uint16_t spo2_whole   = spo2_raw / 10;
+      uint16_t spo2_decimal = spo2_raw % 10;
+
+
+      snprintf(hr_str, sizeof(hr_str), "HR=%u.%u bpm", hr_whole, hr_decimal);
+      snprintf(spo2_str, sizeof(spo2_str), "SpO2=%u.%u%%", spo2_whole, spo2_decimal);
 
       displayPrintf(DISPLAY_ROW_8, hr_str);
       displayPrintf(DISPLAY_ROW_9, spo2_str);
     }
+    else if (char_handle == ble_data.characteristicHandle_fall)
+    {
+        if (data[0] == 0x01)
+        {
+            LOG_INFO("Fall indication received!\n\r");
+            displayPrintf(DISPLAY_ROW_ACTION, "FALL DETECTED");
+            ble_data.fall_alert_active = true;
+
+            // Start Timer 1 every 250ms
+            sl_sleeptimer_start_periodic_timer_ms(&blink_timer, 250, blink_timer_callback, NULL, 0, 0);
+        }
+    }
+
   }
   break;
 
