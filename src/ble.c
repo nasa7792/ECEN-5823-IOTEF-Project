@@ -288,7 +288,6 @@ void handle_ble_event(sl_bt_msg_t *evt)
       // Dealing with temperature values ??
       if (characteristic == gattdb_Heart_Rate_Spo2)
       {
-        LOG_INFO("turning on indications for hrspo2 1 \n \r");
         if (ccf == sl_bt_gatt_server_indication)
         {
           ble_data.HRSO2IndicationsEnabled = true;
@@ -304,7 +303,6 @@ void handle_ble_event(sl_bt_msg_t *evt)
 
       if (characteristic == gattdb_Fall_characteristic)
       {
-        LOG_INFO("turning on indications for fall service 1 \n \r");
         if (ccf == sl_bt_gatt_server_indication)
         {
           ble_data.FallDetection_Indications_Enabled = true;
@@ -386,7 +384,6 @@ void handle_ble_event(sl_bt_msg_t *evt)
   }
 
   case sl_bt_evt_sm_bonded_id:
-    LOG_INFO("bonding done \n \r");
     ble_data.bonded = true;
     // clear up the display rows
     displayPrintf(DISPLAY_ROW_PASSKEY, " ");

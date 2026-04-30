@@ -76,7 +76,7 @@ void process_HRSPO2_values(void)
         uint16_t spo2_raw = (HRSPO2_rx_buf[1] << 8) | HRSPO2_rx_buf[2];
         uint8_t hr_conf = HRSPO2_rx_buf[3];
         uint16_t hr_raw = (HRSPO2_rx_buf[4] << 8) | HRSPO2_rx_buf[5];
-        int8_t algo_stat = (int8_t)HRSPO2_rx_buf[7]; // signed! this is WHRM status
+        int8_t algo_stat = (int8_t)HRSPO2_rx_buf[7];
 
         if (algo_stat == 0)
         {
