@@ -2,7 +2,7 @@
  * ble.c
  *
  *  Created on: Feb 15, 2026
- *      Author: Nalin Saxena
+ *      Author:  Nalin Saxena and Abhirath Koushik
  *
  *  File Brief- Implementation file for All BLE related Apis, and helper macros
  */
@@ -38,20 +38,10 @@ void handle_ble_event(sl_bt_msg_t *evt)
   bd_addr address;
   uint8_t address_type;
   const char adv_msg[] = "Search Caregiver";
-  const char scan_msg[] = "Discovering";
+  const char scan_msg[] = "Searching Patient";
 
   // server address
   uint8_t server_addr[6] = SERVER_BT_ADDRESS;
-  char server_str[18];
-  // format the server address
-  snprintf(server_str, sizeof(server_str),
-           "%02X:%02X:%02X:%02X:%02X:%02X",
-           server_addr[5],
-           server_addr[4],
-           server_addr[3],
-           server_addr[2],
-           server_addr[1],
-           server_addr[0]);
 
   // Handle stack events
   switch (SL_BT_MSG_ID(evt->header))
@@ -129,7 +119,6 @@ void handle_ble_event(sl_bt_msg_t *evt)
 /*Client logic starts*/
 #else
     displayPrintf(DISPLAY_ROW_NAME, BLE_DEVICE_TYPE_STRING);
-    displayPrintf(DISPLAY_ROW_BTADDR, addrStr);
     displayPrintf(DISPLAY_ROW_CONNECTION, scan_msg);
 
     // set scanning mode use passive scanning as per assignment
@@ -201,7 +190,8 @@ void handle_ble_event(sl_bt_msg_t *evt)
     }
 #else
     // if we are client we stop scanning
-    displayPrintf(DISPLAY_ROW_BTADDR2, server_str);
+    const char connected_caregiver[] = "Connected 2 Patient";
+    displayPrintf(DISPLAY_ROW_CONNECTION, connected_caregiver);
     sc = sl_bt_scanner_stop();
     if (sc != SL_STATUS_OK)
     {
@@ -436,7 +426,6 @@ void handle_ble_event(sl_bt_msg_t *evt)
 
       break;
     }
-    LOG_INFO("server presnet \n \r");
 
     sc = sl_bt_scanner_stop();
     app_assert_status(sc);

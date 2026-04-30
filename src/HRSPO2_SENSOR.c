@@ -2,7 +2,7 @@
  * HRSPO2.c
  *
  *  Created on: 15-Apr-2026
- *      Author: nalin
+ *      Author: Nalin Saxena
  */
 
 #include "HRSPO2_SENSOR.h"

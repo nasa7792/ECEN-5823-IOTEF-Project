@@ -2,7 +2,7 @@
  * ADXL343.c
  *
  *  Created on: Apr 19, 2026
- *      Author: abhir
+ *      Author: Abhirath Koushik
  */
 
 #include "ADXL343.h"

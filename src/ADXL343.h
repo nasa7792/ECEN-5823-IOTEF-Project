@@ -2,7 +2,7 @@
  * ADXL343.h
  *
  *  Created on: Apr 19, 2026
- *      Author: abhir
+ *      Author: Abhirath Koushik
  */
 
 #ifndef SRC_ADXL343_H_

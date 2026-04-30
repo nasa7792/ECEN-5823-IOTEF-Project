@@ -110,5 +110,5 @@ void I2C0_IRQHandler(void)
 
 uint32_t letimerMilliseconds(void)
 {
-  return elapsed_ms * 3; // each tick is 3seconds
+  return elapsed_ms * 5; // each tick is 3seconds
 }

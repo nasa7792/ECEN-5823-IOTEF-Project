@@ -2,7 +2,7 @@
  * scheduler.h
  *
  *  Created on: Feb 4, 2026
- *      Author: Nalin Saxena
+ *      Author: Nalin Saxena and Abhirath Koushik
  * 
  * Edited on - 3/25/2026
  * 
@@ -81,7 +81,8 @@ sets the pb1 released event
 void setEvent_PB1_Released();
 
 void setEvent_ADXL343_Freefall();
-void adxl343_state_machine(sl_bt_msg_t *evt);
+
+
 
 
 /*

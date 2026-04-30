@@ -60,7 +60,7 @@ static inline bool IsClientDevice() { return false; }
 
 #define BUILD_INCLUDES_BLE_SERVER 0
 #define BUILD_INCLUDES_BLE_CLIENT 1
-#define BLE_DEVICE_TYPE_STRING "Client"
+#define BLE_DEVICE_TYPE_STRING "Caregiver Node"
 static inline bool IsClientDevice() { return true;}
 static inline bool IsServerDevice() { return false; }
 

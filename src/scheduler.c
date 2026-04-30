@@ -129,8 +129,7 @@ void server_state_machine(sl_bt_msg_t *evt)
   case STATE0_IDLE:
     if (signals & evtLETIMER0_UnderFlow)
     {
-
-      if (getBleDataPtr()->connectionOpen == false)
+      if (getBleDataPtr()->connectionOpen == false )
       {
         return;
       }
@@ -144,7 +143,7 @@ void server_state_machine(sl_bt_msg_t *evt)
   case STATE1_WAKEUP_WAIT:
     if (signals & evtLETIMER0_Comp1)
     {
-      sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
+
       read_fifo_from_HRSPO2(); // combined write+read in one transaction
       nextState = STATE2_I2C_READ_COMPLETE;
     }
@@ -162,7 +161,7 @@ void server_state_machine(sl_bt_msg_t *evt)
     }
     if (signals & evtI2CTransferError)
     {
-      LOG_INFO("I2C error happened going back to idle lets try in next measurement \n \r");
+      sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
       nextState = STATE0_IDLE;
     }
     break;
@@ -302,7 +301,7 @@ void discovery_state_machine(sl_bt_msg_t *evt)
     else if (currentState == STATE6_ENABLE_FALL_INDICATIONS)
     {
       ble_data->FallDetection_Indications_Enabled = true;
-      displayPrintf(DISPLAY_ROW_CONNECTION, "Handling Indications");
+      displayPrintf(DISPLAY_ROW_ACTION, "Patients stats are");
       nextState = STATE0_IDLE;
     }
     break;

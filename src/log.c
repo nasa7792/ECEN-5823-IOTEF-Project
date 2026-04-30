@@ -43,7 +43,7 @@ uint32_t loggerGetTimestamp()
      //           Put the letimerMilliseconds() function in your irq.c/.h files.
 
      return letimerMilliseconds();
-	   
+
 } // loggerGetTimestamp
 
 

@@ -2,7 +2,7 @@
  * ble.h
  *
  *  Created on: Feb 15, 2026
- *      Author: Nalin Saxena
+ *      Author: Nalin Saxena and Abhirath Koushik
  *
  * File Brief- Header file for All BLE related Apis, and helper macros
  */
